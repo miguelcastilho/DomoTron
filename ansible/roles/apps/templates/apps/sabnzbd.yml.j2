@@ -1,0 +1,65 @@
+name: linuxserver-sabnzbd
+services:
+  sabnzbd:
+    cpu_shares: 90
+    command: []
+    container_name: sabnzbd
+    deploy:
+      resources:
+        limits:
+          memory: 7941M
+    environment:
+      - "TZ={{ timezone }}"
+      - PUID=1000
+      - PGID=1000
+    image: linuxserver/sabnzbd:4.4.1
+    labels:
+      icon: https://raw.githubusercontent.com/linuxserver/docker-templates/master/linuxserver.io/img/sabnzbd-icon.png
+    ports:
+      - target: 8080
+        published: "8080"
+        protocol: tcp
+    restart: unless-stopped
+    volumes:
+      - type: bind
+        source: "{{ mediabox_data_path }}/sabnzbd"
+        target: /config
+      - type: bind
+        source: "{{ mediabox_media_path }}"
+        target: /data
+    devices: []
+    cap_add: []
+    networks:
+      - app
+    privileged: false
+    hostname: sabnzbd
+networks:
+  app:
+    name: app
+x-casaos:
+  architectures:
+    - amd64
+    - arm64
+  author: WisdomSky
+  category: LinuxServer.io
+  description:
+    en_us: "Visit homepage: https://hub.docker.com/r/linuxserver/sabnzbd/"
+  developer: LinuxServer.io
+  hostname: "sabnzbd.{{ domain }}"
+  icon: https://raw.githubusercontent.com/linuxserver/docker-templates/master/linuxserver.io/img/sabnzbd-icon.png
+  index: /
+  is_uncontrolled: false
+  main: sabnzbd
+  port_map: ""
+  project_url: http://sabnzbd.org/
+  scheme: http
+  store_app_id: linuxserver-sabnzbd
+  tagline:
+    en_us: Makes Usenet as simple and streamlined as possible by automating
+      everything we can. All you have to do is add an. Nzb. SABnzbd takes over
+      from there, where it will be automatically downloaded, verified, repaired,
+      extracted and filed away with zero human interaction.
+  thumbnail: https://raw.githubusercontent.com/linuxserver/docker-templates/master/linuxserver.io/img/sabnzbd-banner.png
+  title:
+    custom: ""
+    en_us: Sabnzbd

@@ -1,0 +1,79 @@
+---
+- name: Check if cloudflared is installed
+  ansible.builtin.shell: |
+    cloudflared version
+  changed_when: false
+  register: cloudflared_version
+  failed_when:
+    - cloudflared_version.rc != 0
+    - "'cloudflared: not found' not in cloudflared_version.stderr"
+
+- when: cloudflared_version.rc != 0
+  block:
+    - name: Ensure the directory for the keyring exists
+      become: true
+      ansible.builtin.file:
+        path: /usr/share/keyrings
+        state: directory
+        mode: "0755"
+
+    - name: Add Cloudflare's package signing key
+      become: true
+      ansible.builtin.get_url:
+        url: https://pkg.cloudflare.com/cloudflare-main.gpg
+        dest: /usr/share/keyrings/cloudflare-main.gpg
+        mode: "0644"
+
+    - name: Add Cloudflare's apt repository
+      become: true
+      ansible.builtin.apt_repository:
+        # commented due to cloudflared not supporting noble as of this moment
+        # repo: "deb [signed-by=/usr/share/keyrings/cloudflare-main.gpg] https://pkg.cloudflare.com/cloudflared {{ ansible_lsb.codename }} main"
+        repo: "deb [signed-by=/usr/share/keyrings/cloudflare-main.gpg] https://pkg.cloudflare.com/cloudflared jammy main"
+        filename: cloudflared
+        state: present
+
+    - name: Create cloudflared directory
+      become: true
+      ansible.builtin.file:
+        path: /etc/cloudflared
+        state: directory
+        mode: "0755"
+
+    - name: Create the config file for cloudflared and define the ingress rules for the tunnel
+      become: true
+      ansible.builtin.template:
+        src: config.yml.j2
+        dest: /etc/cloudflared/config.yml
+        mode: "0644"
+
+    - name: Create the tunnel credentials file for cloudflared
+      become: true
+      ansible.builtin.template:
+        src: creds.json.j2
+        dest: /etc/cloudflared/creds.json
+        mode: "0644"
+
+    - name: Update repositories and install cloudflared
+      become: true
+      ansible.builtin.apt:
+        update_cache: true
+        name: cloudflared
+        state: latest # noqa package-latest
+
+    - name: Install cloudflared service
+      become: true
+      ansible.builtin.shell: |
+        cloudflared service uninstall
+        cloudflared service install
+
+    - name: Start cloudflared
+      become: true
+      ansible.builtin.service:
+        name: cloudflared
+        state: started
+        enabled: true
+  rescue:
+    - name: Handle failure
+      ansible.builtin.debug:
+        msg: "Failed to install cloudflared"

@@ -1,0 +1,66 @@
+name: linuxserver-duplicati
+services:
+  duplicati:
+    cpu_shares: 90
+    command: []
+    container_name: duplicati
+    deploy:
+      resources:
+        limits:
+          memory: 32097M
+    environment:
+      - "TZ={{ timezone }}"
+      - PUID=1000
+      - PGID=1000
+      - DUPLICATI__WEBSERVICE_PASSWORD="{{ duplicati_webservice_password }}"
+      - SETTINGS_ENCRYPTION_KEY="{{ duplicati_database_encryption_key }}"
+    image: linuxserver/duplicati:2.1.0
+    labels:
+      icon: https://github.com/linuxserver/docker-templates/raw/master/linuxserver.io/img/duplicati-icon.png
+    ports:
+      - target: 8200
+        published: "8200"
+        protocol: tcp
+    restart: unless-stopped
+    volumes:
+      - type: bind
+        source: "{{ mediabox_data_path }}/duplicati"
+        target: /config
+      - type: bind
+        source: "{{ mediabox_data_path }}"
+        target: /source
+    devices: []
+    cap_add: []
+    networks:
+      - app
+    privileged: false
+    hostname: duplicati
+networks:
+  app:
+    name: app
+x-casaos:
+  architectures:
+    - amd64
+    - arm64
+  author: WisdomSky
+  category: LinuxServer.io
+  description:
+    en_us: "Visit homepage: https://hub.docker.com/r/linuxserver/duplicati/"
+  developer: LinuxServer.io
+  hostname: "duplicati.{{ domain }}"
+  icon: https://github.com/linuxserver/docker-templates/raw/master/linuxserver.io/img/duplicati-icon.png
+  index: /
+  is_uncontrolled: false
+  main: duplicati
+  port_map: ""
+  project_url: https://www.duplicati.com/
+  scheme: http
+  store_app_id: linuxserver-duplicati
+  tagline:
+    en_us: Works with standard protocols like FTP, SSH, WebDAV as well as popular
+      services like Microsoft OneDrive, Amazon Cloud Drive & S3, Google Drive,
+      box. Com, Mega, hubiC and many others.
+  thumbnail: https://github.com/linuxserver/docker-templates/raw/master/linuxserver.io/img/duplicati-icon.png
+  title:
+    custom: ""
+    en_us: Duplicati
