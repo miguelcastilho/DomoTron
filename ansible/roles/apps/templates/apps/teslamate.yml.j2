@@ -78,7 +78,7 @@ services:
       - "POSTGRES_DB={{ teslamate_database_name }}"
       - "POSTGRES_PASSWORD={{ teslamate_database_password }}"
       - "POSTGRES_USER={{ teslamate_database_user }}"
-    image: postgres:15
+    image: postgres:17
     labels:
       icon: https://icon.casaos.io/main/all/postgres.png
     restart: unless-stopped
