@@ -1,0 +1,22 @@
+---
+- name: Update and upgrade packages on multiple hosts
+  hosts: all
+  become: true
+  tasks:
+    - name: Update apt package index
+      ansible.builtin.apt:
+        update_cache: yes
+
+    - name: Perform a safe upgrade of installed packages
+      ansible.builtin.apt:
+        upgrade: yes
+
+    - name: Check if reboot is required
+      ansible.builtin.stat:
+        path: /var/run/reboot-required
+      register: reboot_check
+
+    - name: Print reboot required status if necessary
+      ansible.builtin.debug:
+        msg: "Reboot is required on {{ inventory_hostname }}"
+      when: reboot_check.stat.exists

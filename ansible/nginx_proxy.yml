@@ -1,0 +1,18 @@
+---
+- name: Install Nginx and configure Certbot with DNS-01 Challenge
+  hosts: nginx_proxy
+  gather_facts: no
+  any_errors_fatal: true
+  vars_files:
+    - tf_ansible_vars.yml
+  vars:
+    cloudflare_api_token: "{{ lookup('vars', 'tf_cf_token') }}"
+  tasks:
+    - name: Wait for system to become reachable
+      ansible.builtin.wait_for_connection:
+
+    - name: Gather facts for the first time
+      ansible.builtin.setup:
+
+    - ansible.builtin.include_role:
+        name: nginx_proxy

@@ -1,0 +1,111 @@
+name: teslamate
+services:
+  teslamate:
+    cpu_shares: 10
+    command: []
+    container_name: teslamate
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+    environment:
+      - DATABASE_HOST=teslamate-database
+      - "DATABASE_NAME={{ teslamate_database_name }}"
+      - "DATABASE_PASS={{ teslamate_database_password }}"
+      - "DATABASE_USER={{ teslamate_database_user }}"
+      - "ENCRYPTION_KEY={{ teslamate_database_encryption_key }}"
+      - MQTT_HOST=mqtt
+    hostname: teslamate
+    image: teslamate/teslamate:1.32.0
+    labels:
+      icon: https://upload.wikimedia.org/wikipedia/commons/e/e8/Tesla_logo.png
+    ports:
+      - target: 4000
+        published: "4000"
+        protocol: tcp
+    restart: unless-stopped
+    volumes:
+      - type: bind
+        source: "{{ mediabox_data_path }}/teslamate/teslamate"
+        target: /opt/app/import
+    user: "1000"
+    devices: []
+    cap_add: []
+    networks:
+      - app
+    privileged: false
+  grafana:
+    cpu_shares: 10
+    command: []
+    container_name: teslamate-grafana
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+    environment:
+      - DATABASE_HOST=teslamate-database
+      - "DATABASE_NAME={{ teslamate_database_name }}"
+      - "DATABASE_PASS={{ teslamate_database_password }}"
+      - "DATABASE_USER={{ teslamate_database_user }}"
+    image: teslamate/grafana:1.32.0
+    labels:
+      icon: https://icon.casaos.io/main/all/grafana.png
+    ports:
+      - target: 3000
+        published: "3000"
+        protocol: tcp
+    restart: unless-stopped
+    volumes:
+      - type: bind
+        source: "{{ mediabox_data_path }}/teslamate/grafana"
+        target: /var/lib/grafana
+    user: "1000"
+    devices: []
+    cap_add: []
+    networks:
+      - app
+    privileged: false
+    hostname: teslamate-grafana
+  postgres:
+    cpu_shares: 10
+    command: []
+    container_name: teslamate-database
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+    environment:
+      - "POSTGRES_DB={{ teslamate_database_name }}"
+      - "POSTGRES_PASSWORD={{ teslamate_database_password }}"
+      - "POSTGRES_USER={{ teslamate_database_user }}"
+    image: postgres:15
+    labels:
+      icon: https://icon.casaos.io/main/all/postgres.png
+    restart: unless-stopped
+    volumes:
+      - type: bind
+        source: "{{ mediabox_data_path }}/teslamate/postgres"
+        target: /var/lib/postgresql/data
+    user: "1000"
+    ports: []
+    devices: []
+    cap_add: []
+    networks:
+      - app
+    privileged: false
+    hostname: teslamate-database
+networks:
+  app:
+    name: app
+x-casaos:
+  author: self
+  category: self
+  hostname: "teslamate.{{ domain }}"
+  icon: https://upload.wikimedia.org/wikipedia/commons/e/e8/Tesla_logo.png
+  index: /
+  is_uncontrolled: false
+  port_map: ""
+  scheme: http
+  store_app_id: teslamate
+  title:
+    custom: Teslamate

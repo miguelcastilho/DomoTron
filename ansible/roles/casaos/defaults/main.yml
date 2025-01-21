@@ -1,0 +1,4 @@
+---
+casaos_app_stores:
+  - https://casaos-appstore.paodayag.dev/linuxserver.zip
+  - https://github.com/mr-manuel/CasaOS-HomeAutomation-AppStore/archive/refs/tags/latest.zip
