@@ -1,0 +1,10 @@
+---
+- name: Install CasaOS
+  ansible.builtin.shell: |
+    set -o pipefail
+    curl -fsSL https://get.casaos.io | sudo bash
+
+- name: Register additional app stores
+  ansible.builtin.shell: |
+    casaos-cli app-management register app-store {{ item }}
+  loop: "{{ casaos_app_stores }}"

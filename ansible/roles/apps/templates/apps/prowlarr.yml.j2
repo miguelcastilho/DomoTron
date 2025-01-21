@@ -1,0 +1,84 @@
+name: linuxserver-prowlarr
+services:
+    prowlarr:
+        cpu_shares: 90
+        command: []
+        container_name: prowlarr
+        deploy:
+            resources:
+                limits:
+                    memory: "8326742016"
+        environment:
+            TZ: "{{ timezone }}"
+            PUID: 1000
+            PGID: 1000
+        image: linuxserver/prowlarr:1.29.2
+        labels:
+            icon: https://raw.githubusercontent.com/linuxserver/docker-templates/master/linuxserver.io/img/prowlarr-logo.png
+        networks:
+            app: null
+        ports:
+            - target: 9696
+              published: "9696"
+              protocol: tcp
+        restart: unless-stopped
+        volumes:
+            - type: bind
+              source: "{{ mediabox_data_path }}/prowlarr"
+              target: /config
+    flaresolverr:
+        cpu_shares: 90
+        command: []
+        container_name: flaresolverr
+        deploy:
+            resources:
+                limits:
+                    memory: 7941M
+        environment:
+            - CAPTCHA_SOLVER=none
+            - LOG_HTML=false
+            - LOG_LEVEL=info
+            - "TZ={{ timezone }}"
+        hostname: flaresolverr
+        image: ghcr.io/flaresolverr/flaresolverr:v3.3.21
+        ports:
+            - target: 8191
+              published: "8191"
+              protocol: tcp
+        restart: unless-stopped
+        volumes: []
+        user: "1000"
+        devices: []
+        cap_add: []
+        networks:
+            app: null
+        privileged: false
+networks:
+    app:
+        name: app
+    default:
+        name: linuxserver-prowlarr_default
+x-casaos:
+    architectures:
+        - amd64
+        - arm64
+    author: WisdomSky
+    category: LinuxServer.io
+    description:
+        en_us: 'Visit homepage: https://github.com/orgs/linuxserver/packages/container/package/prowlarr'
+    developer: LinuxServer.io
+    hostname: "prowlarr.{{ domain }}"
+    icon: https://raw.githubusercontent.com/linuxserver/docker-templates/master/linuxserver.io/img/prowlarr-logo.png
+    index: /
+    is_uncontrolled: false
+    main: prowlarr
+    port_map: ""
+    project_url: https://github.com/Prowlarr/Prowlarr
+    scheme: http
+    store_app_id: linuxserver-prowlarr
+    tagline:
+        en_us: A indexer manager/proxy built on the popular arr. Net/reactjs base stack to integrate with your various PVR apps. Prowlarr supports both Torrent Trackers and Usenet Indexers. It integrates seamlessly with Sonarr, Radarr, Lidarr, and Readarr offering complete management of your indexers with no per app Indexer setup required (we do it all).
+    thumbnail: https://raw.githubusercontent.com/linuxserver/docker-templates/master/linuxserver.io/img/prowlarr-banner.png
+    title:
+        custom: ""
+        en_us: Prowlarr

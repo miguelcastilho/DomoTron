@@ -1,0 +1,8 @@
+---
+extends: default
+
+rules:
+    line-length: disable
+    truthy:
+        level: error  # Set the truthy warning to be treated as an error
+        check-keys: false  # don't check truthy for keys because of GitHub Actions

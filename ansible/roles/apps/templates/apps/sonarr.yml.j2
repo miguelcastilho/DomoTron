@@ -1,0 +1,94 @@
+name: linuxserver-sonarr
+services:
+  sonarr:
+    cpu_shares: 90
+    command: []
+    container_name: sonarr
+    deploy:
+      resources:
+        limits:
+          memory: 7941M
+    environment:
+      - TZ="{{ timezone }}"
+      - PUID=1000
+      - PGID=1000
+    image: linuxserver/sonarr:4.0.12
+    labels:
+      icon: https://raw.githubusercontent.com/linuxserver/docker-templates/master/linuxserver.io/img/sonarr-icon.png
+    ports:
+      - target: 8989
+        published: "8989"
+        protocol: tcp
+    restart: unless-stopped
+    volumes:
+      - type: bind
+        source: "{{ mediabox_data_path }}/sonarr"
+        target: /config
+      - type: bind
+        source: "{{ mediabox_media_path }}"
+        target: /data
+    devices: []
+    cap_add: []
+    networks:
+      - app
+    privileged: false
+    hostname: sonarr
+  recyclarr:
+    cpu_shares: 10
+    command: []
+    container_name: recyclarr
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+    environment:
+      - "TZ={{ timezone }}"
+      - CRON_SCHEDULE=@daily
+      - RECYCLARR_CREATE_CONFIG=true
+    hostname: recyclarr
+    image: ghcr.io/recyclarr/recyclarr:7.4.0
+    labels:
+      icon: https://recyclarr.dev/img/recyclarr.png
+    restart: unless-stopped
+    volumes:
+      - type: bind
+        source: "{{ mediabox_data_path }}/recyclarr"
+        target: /config
+    user: "1000"
+    ports: []
+    devices: []
+    cap_add: []
+    networks:
+      - app
+    privileged: false
+networks:
+  app:
+    name: app
+x-casaos:
+  architectures:
+    - amd64
+    - arm64
+  author: WisdomSky
+  category: LinuxServer.io
+  description:
+    en_us: "Visit homepage: https://hub.docker.com/r/linuxserver/sonarr/"
+  developer: LinuxServer.io
+  hostname: "sonarr.{{ domain }}"
+  icon: https://raw.githubusercontent.com/linuxserver/docker-templates/master/linuxserver.io/img/sonarr-icon.png
+  index: /
+  is_uncontrolled: false
+  main: sonarr
+  port_map: ""
+  project_url: https://sonarr.tv/
+  scheme: http
+  store_app_id: linuxserver-sonarr
+  tagline:
+    en_us: (formerly NZBdrone) is a PVR for usenet and bittorrent users. It can
+      monitor multiple RSS feeds for new episodes of your favorite shows and
+      will grab, sort and rename them. It can also be configured to
+      automatically upgrade the quality of files already downloaded when a
+      better quality format becomes available.
+  thumbnail: https://raw.githubusercontent.com/linuxserver/docker-templates/master/linuxserver.io/img/sonarr-banner.png
+  title:
+    custom: ""
+    en_us: Sonarr

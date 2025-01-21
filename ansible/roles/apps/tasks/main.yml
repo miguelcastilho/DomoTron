@@ -1,0 +1,51 @@
+---
+- name: Copy mosquitto.conf to folder
+  ansible.builtin.copy:
+    src: mosquitto.conf
+    dest: "{{ mediabox_data_path }}/mqtt/mosquitto.conf"
+    mode: "0644"
+
+- name: Template recyclarr.yml to folder
+  ansible.builtin.template:
+    src: recyclarr.yml.j2
+    dest: "{{ mediabox_data_path }}/recylcarr/recyclarr.yml"
+    mode: "0644"
+
+- name: Get all *.yml.j2 files
+  delegate_to: localhost
+  ansible.builtin.find:
+    paths: "{{ role_path }}/templates/apps"
+    patterns: "*.yml.j2"
+  register: template_files
+  changed_when: false
+
+- name: Process template files
+  when: template_files.matched > 0
+  block:
+    - name: Copy template files
+      ansible.builtin.template:
+        src: "{{ item.path }}"
+        dest: "/tmp/{{ item.path | basename | replace('.j2', '') }}"
+        mode: "0644"
+      loop: "{{ template_files.files }}"
+      loop_control:
+        label: "{{ item.path }}"
+
+    - name: Deploy apps
+      ansible.builtin.shell: |
+        casaos-cli app-management install -f /tmp/{{ item.path | basename | replace('.j2', '') }}
+      loop: "{{ template_files.files }}"
+      loop_control:
+        label: "{{ item.path }}"
+
+    - name: Delete template files
+      ansible.builtin.file:
+        path: "/tmp/{{ item.path | basename | replace('.j2', '') }}"
+        state: absent
+      loop: "{{ template_files.files }}"
+      loop_control:
+        label: "{{ item.path }}"
+  rescue:
+    - name: Log error in processing template files block
+      ansible.builtin.debug:
+        msg: "An error occurred in the process template files block"

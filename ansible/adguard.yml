@@ -1,0 +1,22 @@
+---
+- name: Configure AdGuard Home
+  hosts: adguard
+  gather_facts: no
+  any_errors_fatal: true
+  tasks:
+    - name: Wait for system to become reachable
+      ansible.builtin.wait_for_connection:
+
+    - name: Gather facts for the first time
+      ansible.builtin.setup:
+
+    - name: Ensure AdGuard Home is installed
+      ansible.builtin.stat:
+        path: /opt/AdGuardHome/AdGuardHome
+      register: adguard_installed
+      failed_when: false # To ensure playbook doesn't fail if file doesn't exist
+
+    - name: Install AdGuard Home if not installed
+      ansible.builtin.include_role:
+        name: adguard_home
+      when: not adguard_installed.stat.exists

@@ -1,0 +1,134 @@
+---
+- name: Create 'media' directory
+  become: true
+  ansible.builtin.file:
+    path: "{{ mediabox_media_path }}"
+    state: directory
+    mode: "0755"
+
+- name: Create 'torrents' directory
+  become: true
+  ansible.builtin.file:
+    path: "{{ mediabox_media_path }}/torrents"
+    state: directory
+    mode: "0755"
+
+- name: Create 'movies' directory inside 'torrents'
+  become: true
+  ansible.builtin.file:
+    path: "{{ mediabox_media_path }}/torrents/movies"
+    state: directory
+    mode: "0755"
+
+- name: Create 'tv' directory inside 'torrents'
+  become: true
+  ansible.builtin.file:
+    path: "{{ mediabox_media_path }}/torrents/tv"
+    state: directory
+    mode: "0755"
+
+- name: Create 'usenet' directory
+  become: true
+  ansible.builtin.file:
+    path: "{{ mediabox_media_path }}/usenet"
+    state: directory
+    mode: "0755"
+
+- name: Create 'incomplete' directory inside 'usenet'
+  become: true
+  ansible.builtin.file:
+    path: "{{ mediabox_media_path }}/usenet/incomplete"
+    state: directory
+    mode: "0755"
+
+- name: Create 'complete' directory inside 'usenet'
+  become: true
+  ansible.builtin.file:
+    path: "{{ mediabox_media_path }}/usenet/complete"
+    state: directory
+    mode: "0755"
+
+- name: Create 'movies' directory inside 'usenet/complete'
+  become: true
+  ansible.builtin.file:
+    path: "{{ mediabox_media_path }}/usenet/complete/movies"
+    state: directory
+    mode: "0755"
+
+- name: Create 'tv' directory inside 'usenet/complete'
+  become: true
+  ansible.builtin.file:
+    path: "{{ mediabox_media_path }}/usenet/complete/tv"
+    state: directory
+    mode: "0755"
+
+- name: Create 'media' directory
+  become: true
+  ansible.builtin.file:
+    path: "{{ mediabox_media_path }}/media"
+    state: directory
+    mode: "0755"
+
+- name: Create 'movies' directory inside 'media'
+  become: true
+  ansible.builtin.file:
+    path: "{{ mediabox_media_path }}/media/movies"
+    state: directory
+    mode: "0755"
+
+- name: Create 'tv' directory inside 'media'
+  become: true
+  ansible.builtin.file:
+    path: "{{ mediabox_media_path }}/media/tv"
+    state: directory
+    mode: "0755"
+
+- name: Create 'teslamate' directory
+  become: true
+  ansible.builtin.file:
+    path: "{{ mediabox_data_path }}/teslamate"
+    state: directory
+    mode: "0755"
+
+- name: Create 'grafana' directory inside 'teslamate'
+  become: true
+  ansible.builtin.file:
+    path: "{{ mediabox_data_path }}/teslamate/grafana"
+    state: directory
+    mode: "0755"
+
+- name: Create 'mqtt' directory
+  become: true
+  ansible.builtin.file:
+    path: "{{ mediabox_data_path }}/mqtt"
+    state: directory
+    mode: "0755"
+
+- name: Create 'recyclarr' directory
+  become: true
+  ansible.builtin.file:
+    path: "{{ mediabox_data_path }}/recyclarr"
+    state: directory
+    mode: "0755"
+
+- name: Set current ansible user
+  ansible.builtin.set_fact:
+    user: "{{ ansible_user }}"
+
+- name: "Ensure correct permisions in {{ mediabox_media_path }}"
+  become: true
+  ansible.builtin.file:
+    path: "{{ mediabox_media_path }}"
+    owner: "{{ user }}"
+    group: "{{ user }}"
+    mode: u=rwX,g=rX,o=rX
+    recurse: true
+
+- name: "Ensure correct permisions in {{ mediabox_data_path }}"
+  become: true
+  ansible.builtin.file:
+    path: "{{ mediabox_data_path }}"
+    owner: "{{ user }}"
+    group: "{{ user }}"
+    mode: u=rwX,g=rX,o=rX
+    recurse: true

@@ -1,0 +1,75 @@
+name: linuxserver-deluge
+services:
+  deluge:
+    cpu_shares: 90
+    command: []
+    container_name: deluge
+    deploy:
+      resources:
+        limits:
+          memory: 7941M
+    environment:
+      - DELUGE_LOGLEVEL=error
+      - "TZ={{ timezone }}"
+      - PUID=1000
+      - PGID=1000
+    image: linuxserver/deluge:2.1.1
+    labels:
+      icon: https://raw.githubusercontent.com/linuxserver/docker-templates/master/linuxserver.io/img/deluge-icon.png
+    ports:
+      - target: 8112
+        published: "8112"
+        protocol: tcp
+      - target: 58946
+        published: "58946"
+        protocol: tcp
+      - target: 58946
+        published: "58946"
+        protocol: udp
+      - target: 58846
+        published: "58846"
+        protocol: tcp
+    restart: unless-stopped
+    volumes:
+      - type: bind
+        source: "{{ mediabox_data_path }}/deluge"
+        target: /config
+      - type: bind
+        source: "{{ mediabox_media_path }}"
+        target: /data
+    devices: []
+    cap_add: []
+    networks:
+      - app
+    privileged: false
+    hostname: deluge
+networks:
+  default:
+    name: linuxserver-deluge_default
+  app:
+    name: app
+x-casaos:
+  architectures:
+    - amd64
+    - arm64
+  author: WisdomSky
+  category: LinuxServer.io
+  description:
+    en_us: "Visit homepage: https://hub.docker.com/r/linuxserver/deluge/"
+  developer: LinuxServer.io
+  hostname: "deluge.{{ domain }}"
+  icon: https://raw.githubusercontent.com/linuxserver/docker-templates/master/linuxserver.io/img/deluge-icon.png
+  index: /
+  is_uncontrolled: false
+  main: deluge
+  port_map: ""
+  project_url: http://deluge-torrent.org/
+  scheme: http
+  store_app_id: linuxserver-deluge
+  tagline:
+    en_us: A lightweight, Free Software, cross-platform BitTorrent client. * Full
+      Encryption * WebUI * Plugin System * Much more. . .
+  thumbnail: https://avatars2.githubusercontent.com/u/6733935?v=3&s=200
+  title:
+    custom: ""
+    en_us: Deluge

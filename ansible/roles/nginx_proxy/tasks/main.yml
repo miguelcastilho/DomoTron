@@ -1,0 +1,9 @@
+---
+- name: Update all packages
+  ansible.builtin.apt:
+    update_cache: true
+    upgrade: "dist"
+
+- name: Install Nginx Proxy Manager
+  ansible.builtin.shell: |
+    sh -c "$(wget --no-cache -qO- https://raw.githubusercontent.com/ej52/proxmox/main/install.sh)" -s --app nginx-proxy-manager

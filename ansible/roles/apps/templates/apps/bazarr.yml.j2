@@ -1,0 +1,60 @@
+name: linuxserver-bazarr
+services:
+    bazarr:
+        cpu_shares: 90
+        command: []
+        container_name: bazarr
+        deploy:
+            resources:
+                limits:
+                    memory: "8326742016"
+        environment:
+            TZ: "{{ timezone }}"
+            PUID: 1000
+            PGID: 1000
+        image: linuxserver/bazarr:1.5.1
+        labels:
+            icon: https://raw.githubusercontent.com/linuxserver/docker-templates/master/linuxserver.io/img/bazarr.png
+        networks:
+            app: null
+        ports:
+            - target: 6767
+              published: "6767"
+              protocol: tcp
+        restart: unless-stopped
+        volumes:
+            - type: bind
+              source: "{{ mediabox_data_path }}/bazarr"
+              target: /config
+            - type: bind
+              source: "{{ mediabox_media_path }}"
+              target: /data
+networks:
+    app:
+        name: app
+    default:
+        name: linuxserver-bazarr_default
+x-casaos:
+    architectures:
+        - amd64
+        - arm64
+    author: WisdomSky
+    category: LinuxServer.io
+    description:
+        en_us: 'Visit homepage: https://hub.docker.com/r/linuxserver/bazarr/'
+    developer: LinuxServer.io
+    hostname: "sonarr.{{ domain }}"
+    icon: https://raw.githubusercontent.com/linuxserver/docker-templates/master/linuxserver.io/img/bazarr.png
+    index: /
+    is_uncontrolled: false
+    main: bazarr
+    port_map: ""
+    project_url: https://www.bazarr.media/
+    scheme: http
+    store_app_id: linuxserver-bazarr
+    tagline:
+        en_us: A companion application to Sonarr and Radarr. It can manage and download subtitles based on your requirements. You define your preferences by TV show or movie and Bazarr takes care of everything for you.
+    thumbnail: https://raw.githubusercontent.com/linuxserver/docker-templates/master/linuxserver.io/img/bazarr.png
+    title:
+        custom: ""
+        en_us: Bazarr

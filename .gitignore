@@ -1,0 +1,9 @@
+.DS_Store
+.vscode
+ansible/tf_ansible_vars.yml
+terraform/.terraform
+terraform/.terraform.lock.hcl
+terraform/terraform.tfstate
+terraform/terraform.tfstate.backup
+terraform/terraform.tfvars
+terraform/.vault_pass.txt

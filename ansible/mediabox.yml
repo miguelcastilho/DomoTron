@@ -1,0 +1,59 @@
+---
+- name: Add extra disk to mediabox
+  hosts: pve
+  gather_facts: no
+  any_errors_fatal: true
+  tasks:
+    - name: Add disk
+      ansible.builtin.shell: |
+        qm set 101 -scsi1 /dev/disk/by-id/wwn-0x5000c500b604c053,backup=0
+
+- name: Configure mediabox
+  hosts: mediabox
+  gather_facts: no
+  any_errors_fatal: true
+  vars_files:
+    - ./tf_ansible_vars.yml
+  tasks:
+    - name: Wait for system to become reachable
+      ansible.builtin.wait_for_connection:
+
+    - name: Gather facts for the first time
+      ansible.builtin.setup:
+
+    - name: Install dependencies
+      ansible.builtin.include_role:
+        name: dependencies
+
+    - name: Set up and mount disk
+      become: true
+      block:
+        - name: Create mount directory
+          ansible.builtin.file:
+            path: /mnt/HDD
+            state: directory
+            mode: "0755"
+
+        - name: Mount disk
+          ansible.posix.mount:
+            path: /mnt/HDD
+            src: /dev/sdb1
+            fstype: ext4
+            state: mounted
+      rescue:
+        - name: Cleanup mount directory on failure
+          ansible.builtin.file:
+            path: /mnt/HDD
+            state: absent
+
+    - name: Cloudflared
+      ansible.builtin.include_role:
+        name: cloudflared
+
+    - name: CasaOS
+      ansible.builtin.include_role:
+        name: casaos
+
+    - name: Apps
+      ansible.builtin.include_role:
+        name: apps
