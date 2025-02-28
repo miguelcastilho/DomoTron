@@ -1,8 +1,9 @@
 ---
 name: Lint
 on:
-  push: null
-  pull_request: null
+  pull_request:
+    branches:
+      - main
 permissions: {}
 jobs:
   build:
@@ -18,6 +19,6 @@ jobs:
         with:
           fetch-depth: 0
       - name: Super-linter
-        uses: super-linter/super-linter@v7.2.1
+        uses: super-linter/super-linter@v7.3.0
         env:
           GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"

@@ -23,7 +23,7 @@
 
     - name: Install dependencies
       ansible.builtin.include_role:
-        name: dependencies
+        name: mediabox
 
     - name: Set up and mount disk
       become: true

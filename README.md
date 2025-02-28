@@ -1,8 +1,8 @@
-# HomeServeMate
+# DomoTron
 
 ## Overview
 
-HomeServeMate is a project designed to automate the deployment and configuration of infrastructure on Proxmox using Terraform and Ansible. The Terraform scripts are used to provision the infrastructure, while Ansible is utilized to configure virtual machines (VMs) and Linux containers (LXC).
+DomoTron is a project designed to automate the deployment and configuration of infrastructure on Proxmox using Terraform and Ansible. The Terraform scripts are used to provision the infrastructure, while Ansible is utilized to configure virtual machines (VMs) and Linux containers (LXC).
 
 ## Table of Contents
 
@@ -27,8 +27,8 @@ Before you begin, ensure you have the following installed:
 1. **Clone the Repository:**
 
    ```bash
-   git clone https://github.com/yourusername/HomeServeMate.git
-   cd HomeServeMate
+   git clone https://github.com/yourusername/DomoTron.git
+   cd DomoTron
    ```
 
 2. **Set Up Environment Variables:**

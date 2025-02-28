@@ -12,11 +12,11 @@ terraform {
     }
     cloudflare = {
       source  = "cloudflare/cloudflare"
-      version = "4.50.0"
+      version = "4.52.0"
     }
     random = {
       source  = "hashicorp/random"
-      version = "3.6.3"
+      version = "3.7.1"
     }
     ansible = {
       source  = "nbering/ansible"
@@ -24,7 +24,11 @@ terraform {
     }
     tailscale = {
       source  = "tailscale/tailscale"
-      version = "0.17.2"
+      version = "0.18.0"
+    }
+    null = {
+      source  = "hashicorp/null"
+      version = "3.2.3"
     }
   }
 }

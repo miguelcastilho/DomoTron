@@ -1,0 +1,20 @@
+---
+- name: Apply fix to Intel NIC e1000e hardware unit hang
+  hosts: pve
+  gather_facts: no
+  any_errors_fatal: true
+  tasks:
+    - name: Append post-up command to iface eno1 inet manual
+      ansible.builtin.lineinfile:
+        path: /etc/network/interfaces
+        insertafter: "^iface eno1 inet manual"
+        line: "        post-up ethtool -K eno1 tso off gso off"
+        state: present
+      notify: Restart networking
+
+  handlers:
+    - name: Restart networking
+      ansible.builtin.service:
+        name: networking
+        state: restarted
+        enabled: yes

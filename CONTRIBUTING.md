@@ -1,6 +1,6 @@
-# Contributing to HomeServeMate
+# Contributing to DomoTron
 
-Thank you for considering contributing to HomeServeMate! We welcome contributions from the community and are grateful for your support. To ensure a smooth process, please follow the guidelines below.
+Thank you for considering contributing to DomoTron! We welcome contributions from the community and are grateful for your support. To ensure a smooth process, please follow the guidelines below.
 
 ## Table of Contents
 
@@ -16,7 +16,7 @@ Thank you for considering contributing to HomeServeMate! We welcome contribution
 
 ## Code of Conduct
 
-This project and everyone participating in it is governed by the [HomeServeMate Code of Conduct](CODE_OF_CONDUCT.md). By participating, you are expected to uphold this code. Please report unacceptable behavior to [email](miguelcastilhodias@gmail.com).
+This project and everyone participating in it is governed by the [DomoTron Code of Conduct](CODE_OF_CONDUCT.md). By participating, you are expected to uphold this code. Please report unacceptable behavior to [email](miguelcastilhodias@gmail.com).
 
 ## How Can I Contribute?
 
@@ -31,7 +31,7 @@ If you encounter a bug, please open an issue on GitHub with the following inform
 
 ### Suggesting Enhancements
 
-We welcome suggestions to improve HomeServeMate. Please open an issue on GitHub with the following details:
+We welcome suggestions to improve DomoTron. Please open an issue on GitHub with the following details:
 
 - A clear and descriptive title.
 - A detailed explanation of the enhancement and why it would be useful.
@@ -72,4 +72,4 @@ Thank you for your contributions!
 
 ---
 
-By contributing to this project, you agree to abide by the HomeServeMate [Code of Conduct](CODE_OF_CONDUCT.md).
+By contributing to this project, you agree to abide by the DomoTron [Code of Conduct](CODE_OF_CONDUCT.md).
