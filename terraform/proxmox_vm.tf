@@ -55,4 +55,9 @@ resource "proxmox_vm_qemu" "mediabox" {
 }
 
 
-
+#### Proxmox host
+resource "null_resource" "execute_ansible_on_proxmox" {
+  provisioner "local-exec" {
+    command = "ansible-playbook -i ${var.ansible_inventory} ${var.ansible_playbooks.proxmox} --vault-password-file .vault_pass.txt"
+  }
+}
