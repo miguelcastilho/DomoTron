@@ -38,10 +38,12 @@ resource "proxmox_vm_qemu" "mediabox" {
   ipconfig0 = "ip=${var.mediabox_ip_address}${var.netmask},gw=${var.gateway_ip_address}"
   sshkeys   = var.ssh_public_key
 
+  # Install Ansible Galaxy requirements first
   provisioner "local-exec" {
     command = "ansible-galaxy install -r ${var.ansible_requirements}"
   }
 
+  # Run the Ansible playbook for MediaBox
   provisioner "local-exec" {
     command = "ansible-playbook -i ${var.ansible_inventory} ${var.ansible_playbooks.mediabox} --vault-password-file .vault_pass.txt"
   }
@@ -52,6 +54,12 @@ resource "proxmox_vm_qemu" "mediabox" {
       disks,
     ]
   }
+
+  # Ensure Ansible runs after variable file is created and encrypted
+  depends_on = [
+    local_file.tf_ansible_vars,
+    local_file.ansible_vault_config
+  ]
 }
 
 
@@ -60,4 +68,10 @@ resource "null_resource" "execute_ansible_on_proxmox" {
   provisioner "local-exec" {
     command = "ansible-playbook -i ${var.ansible_inventory} ${var.ansible_playbooks.proxmox} --vault-password-file .vault_pass.txt"
   }
+  
+  # Ensure this runs after the variables file is created
+  depends_on = [
+    local_file.tf_ansible_vars,
+    local_file.ansible_vault_config
+  ]
 }

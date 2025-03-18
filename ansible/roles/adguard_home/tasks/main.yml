@@ -11,16 +11,10 @@
       - curl
     state: present
 
-- name: Check if AdGuard Home is already installed
-  ansible.builtin.stat:
-    path: /opt/AdGuardHome/AdGuardHome
-  register: adguard_binary
-
 - name: Download and run AdGuard Home installation script
   ansible.builtin.shell: |
     set -o pipefail
     curl -s -S -L https://raw.githubusercontent.com/AdguardTeam/AdGuardHome/master/scripts/install.sh | sh -s -- -v
-  when: not adguard_binary.stat.exists
   register: install_result
   changed_when: install_result.rc == 0
   failed_when: install_result.rc != 0

@@ -8,9 +8,13 @@ DomoTron is a project designed to automate the deployment and configuration of i
 
 - [Prerequisites](#prerequisites)
 - [Installation](#installation)
-- [Usage](#usage)
-- [Terraform Configuration](#terraform-configuration)
-- [Ansible Configuration](#ansible-configuration)
+- [Quick Start](#quick-start)
+- [Detailed Usage](#detailed-usage)
+  - [Terraform Configuration](#terraform-configuration)
+  - [Ansible Configuration](#ansible-configuration)
+- [Project Structure](#project-structure)
+- [Provided Services](#provided-services)
+- [Documentation](#documentation)
 - [Contributing](#contributing)
 - [License](#license)
 
@@ -18,9 +22,11 @@ DomoTron is a project designed to automate the deployment and configuration of i
 
 Before you begin, ensure you have the following installed:
 
-- [Terraform](https://www.terraform.io/downloads.html)
-- [Ansible](https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html)
+- [Terraform](https://www.terraform.io/downloads.html) v1.5.7 or newer
+- [Ansible](https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html) 2.12 or newer
 - [Proxmox VE](https://www.proxmox.com/en/)
+- Cloudflare account (optional, for tunnels)
+- Tailscale account (optional, for secure networking)
 
 ## Installation
 
@@ -31,73 +37,99 @@ Before you begin, ensure you have the following installed:
    cd DomoTron
    ```
 
-2. **Set Up Environment Variables:**
+2. **Create Vault Password File:**
 
-   Ensure you have the necessary environment variables set up for Proxmox and other services. This typically includes API tokens, usernames, and passwords.
+   Create a `.vault_pass.txt` file in the root directory with a secure password for Ansible Vault encryption.
 
-3. **Terraform Initialization:**
+   ```bash
+   echo "your-secure-password" > .vault_pass.txt
+   chmod 600 .vault_pass.txt
+   ```
 
-   Navigate to the `terraform` directory and initialize Terraform.
+3. **Configure Variables:**
+
+   Copy `terraform.tfvars.example` to `terraform.tfvars` and edit with your environment-specific values.
+
+## Quick Start
+
+To deploy the complete infrastructure with a single command, use the included deployment script:
+
+```bash
+./deploy.sh
+```
+
+This script will:
+1. Run Terraform to provision infrastructure
+2. Securely pass variables to Ansible
+3. Execute Ansible playbooks to configure all services
+
+## Detailed Usage
+
+### Terraform Configuration
+
+1. **Initialize Terraform:**
 
    ```bash
    cd terraform
    terraform init
    ```
 
-## Usage
-
-### Terraform Configuration
-
-1. **Customize Variables:**
-
-   Edit the `terraform.tfvars` file to configure the variables specific to your environment.
-
-   ```hcl
-   proxmox_endpoint = "https://proxmox.example.com:8006"
-   proxmox_user     = "root@pam"
-   proxmox_password = "yourpassword"
-   ```
-
-2. **Deploy Infrastructure:**
-
-   Run the following commands to plan and apply the Terraform configuration.
+2. **Plan and Apply:**
 
    ```bash
    terraform plan
    terraform apply
    ```
 
+   Terraform will automatically:
+   - Create VMs and LXCs on Proxmox
+   - Set up Cloudflare tunnels
+   - Configure Tailscale networking
+   - Generate encrypted variables for Ansible
+   - Execute Ansible playbooks
+
 ### Ansible Configuration
 
-1. **Inventory Setup:**
+Terraform executes Ansible playbooks automatically after infrastructure provisioning, but you can also run them manually:
 
-   Edit the inventory files located in `ansible/inventory` to match your infrastructure setup.
+```bash
+cd ansible
+ansible-playbook -i inventory/hosts.yml mediabox.yml --vault-password-file ../.vault_pass.txt
+```
 
-2. **Run Ansible Playbooks:**
+## Project Structure
 
-   Execute the Ansible playbooks to configure your VMs and LXCs.
+- **terraform/**: Infrastructure as code
+  - `providers.tf`: Provider configurations
+  - `proxmox_vm.tf`: VM definitions
+  - `proxmox_lxc.tf`: Container definitions
+  - `cloudflared.tf`: Cloudflare tunnel configuration
+  - `export.tf`: Exports variables to Ansible
+  
+- **ansible/**: Configuration management
+  - `roles/`: Service-specific roles
+  - `inventory/`: Host and group definitions
+  - Various playbooks (mediabox.yml, adguard.yml, etc.)
+  
+- **docs/**: Documentation
+  - `GETTING_STARTED.md`: Detailed guide for beginners
+  - `TERRAFORM_ANSIBLE_INTEGRATION.md`: Integration details
 
-   ```bash
-   ansible-playbook -i ansible/inventory/hosts.yml ansible/playbook.yml
-   ```
+## Provided Services
 
-## Terraform structure
+DomoTron sets up the following services:
 
-The `terraform` directory contains all the necessary files for provisioning the infrastructure:
+- **Media Server**: Jellyfin, Sonarr, Radarr, Prowlarr, SABnzbd
+- **AdGuard Home**: Network-wide ad blocking and DNS
+- **Nginx Proxy Manager**: Reverse proxy with SSL management
+- **Tailscale**: Secure networking between devices
 
-- `main.tf`: Main configuration file for Terraform.
-- `variables.tf`: Variable definitions.
-- `terraform.tfvars`: Variable values specific to your environment.
-- `providers.tf`: Provider configurations.
-- `export.tf`: Resource export configurations.
+## Documentation
 
-## Ansible structure
+Additional documentation can be found in the `docs/` directory:
 
-The `ansible` directory contains playbooks and roles for configuring the VMs and LXCs:
-
-- `playbook.yml`: Main playbook for Ansible.
-- `roles/`: Directory containing various roles for service and application configurations.
-- `inventory/`: Directory containing inventory files and group variables.
+- [Getting Started Guide](docs/GETTING_STARTED.md)
+- [Terraform-Ansible Integration](docs/TERRAFORM_ANSIBLE_INTEGRATION.md)
 
 ## Contributing
 

@@ -1,18 +1,38 @@
 ---
-- name: Install Nginx and configure Certbot with DNS-01 Challenge
+- name: Install and configure Nginx Proxy Manager
   hosts: nginx_proxy_manager
   gather_facts: no
   any_errors_fatal: true
   vars_files:
     - tf_ansible_vars.yml
-  vars:
-    cloudflare_api_token: "{{ lookup('vars', 'tf_cf_token') }}"
-  tasks:
+  pre_tasks:
+    - name: Check if tf_ansible_vars.yml exists and is valid
+      ansible.builtin.stat:
+        path: "{{ playbook_dir }}/tf_ansible_vars.yml"
+      register: tf_vars_file
+      delegate_to: localhost
+      
+    - name: Fail if tf_ansible_vars.yml does not exist
+      ansible.builtin.fail:
+        msg: "Required file tf_ansible_vars.yml not found. Please run Terraform first to generate this file."
+      when: not tf_vars_file.stat.exists
+      delegate_to: localhost
+      
     - name: Wait for system to become reachable
       ansible.builtin.wait_for_connection:
-
+      register: connection_result
+      
     - name: Gather facts for the first time
       ansible.builtin.setup:
-
-    - ansible.builtin.include_role:
+      when: connection_result is success
+      
+  tasks:
+    - name: Verify required variables are present
+      ansible.builtin.assert:
+        that:
+          - tf_cf_token is defined
+        msg: "Required variables from Terraform are missing. Please run Terraform to generate them."
+        
+    - name: Include nginx_proxy_manager role
+      ansible.builtin.include_role:
         name: nginx_proxy_manager

@@ -24,6 +24,12 @@ resource "proxmox_lxc" "adguard" {
   provisioner "local-exec" {
     command = "ansible-playbook -i ${var.ansible_inventory} ${var.ansible_playbooks.adguard} --vault-password-file .vault_pass.txt"
   }
+
+  # Ensure Ansible runs after variable file is created and encrypted
+  depends_on = [
+    local_file.tf_ansible_vars,
+    local_file.ansible_vault_config
+  ]
 }
 
 ###### Tailscale
@@ -66,9 +72,16 @@ resource "proxmox_lxc" "tailscale" {
       description,
     ]
   }
+
+  # Ensure Ansible runs after variable file is created and encrypted
+  depends_on = [
+    local_file.tf_ansible_vars,
+    local_file.ansible_vault_config,
+    tailscale_tailnet_key.tailscale_key
+  ]
 }
 
-##### Nginx
+##### Nginx Proxy Manager
 resource "proxmox_lxc" "nginx" {
   target_node  = var.nginx_node
   vmid         = var.nginx_vm_id
@@ -94,4 +107,10 @@ resource "proxmox_lxc" "nginx" {
   provisioner "local-exec" {
     command = "ansible-playbook -i ${var.ansible_inventory} ${var.ansible_playbooks.nginx} --vault-password-file .vault_pass.txt"
   }
+
+  # Ensure Ansible runs after variable file is created and encrypted
+  depends_on = [
+    local_file.tf_ansible_vars,
+    local_file.ansible_vault_config
+  ]
 }
