@@ -2,20 +2,28 @@
 - name: Update packages
   ansible.builtin.apt:
     update_cache: true
-    upgrade: "dist"
+    upgrade: "yes"
+    cache_valid_time: 3600
 
-- name: Install curl
+- name: Install required packages
   ansible.builtin.apt:
-    name: curl
-    state: latest # noqa package-latest
+    name:
+      - curl
+    state: present
+
+- name: Check if AdGuard Home is already installed
+  ansible.builtin.stat:
+    path: /opt/AdGuardHome/AdGuardHome
+  register: adguard_binary
 
 - name: Download and run AdGuard Home installation script
   ansible.builtin.shell: |
     set -o pipefail
     curl -s -S -L https://raw.githubusercontent.com/AdguardTeam/AdGuardHome/master/scripts/install.sh | sh -s -- -v
-
-- name: Stop AdGuardHome service
-  ansible.builtin.shell: /opt/AdGuardHome/AdGuardHome -s stop
+  when: not adguard_binary.stat.exists
+  register: install_result
+  changed_when: install_result.rc == 0
+  failed_when: install_result.rc != 0
 
 - name: Create resolved.conf.d directory
   ansible.builtin.file:
@@ -32,23 +40,32 @@
     dest: /etc/systemd/resolved.conf.d/adguardhome.conf
     mode: "0644"
 
+- name: Check if resolv.conf is already a symlink
+  ansible.builtin.stat:
+    path: /etc/resolv.conf
+  register: resolv_conf
+  
 - name: Backup the existing resolv.conf
   ansible.builtin.copy:
     src: /etc/resolv.conf
     dest: /etc/resolv.conf.backup
     remote_src: true
     mode: "0644"
+  when: not resolv_conf.stat.islnk
 
 - name: Remove existing resolv.conf
   ansible.builtin.file:
     path: /etc/resolv.conf
     state: absent
+  when: not resolv_conf.stat.islnk
 
 - name: Create a symbolic link to systemd-resolve's resolv.conf
   ansible.builtin.file:
     src: /run/systemd/resolve/resolv.conf
     dest: /etc/resolv.conf
     state: link
+  when: not resolv_conf.stat.islnk or
+        resolv_conf.stat.lnk_source != '/run/systemd/resolve/resolv.conf'
 
 - name: Reload systemd-resolved service
   ansible.builtin.systemd:
@@ -57,7 +74,10 @@
     state: restarted
 
 - name: Stop AdGuardHome service
-  ansible.builtin.shell: /opt/AdGuardHome/AdGuardHome -s stop
+  ansible.builtin.systemd:
+    name: AdGuardHome
+    state: stopped
+  ignore_errors: true
 
 - name: Copy AdGuardHome.yaml
   ansible.builtin.template:
@@ -65,6 +85,10 @@
     dest: /opt/AdGuardHome/AdGuardHome.yaml
     trim_blocks: false
     mode: "0644"
+  register: config_change
 
 - name: Start AdGuardHome service
-  ansible.builtin.shell: /opt/AdGuardHome/AdGuardHome -s start
+  ansible.builtin.systemd:
+    name: AdGuardHome
+    state: started
+    enabled: true
