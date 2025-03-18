@@ -61,7 +61,19 @@ fi
 
 # Export environment variables
 export ANSIBLE_VAULT_PASSWORD_FILE="${SCRIPT_DIR}/.vault_pass.txt"
-echo -e "${GREEN}Vault password configured for Ansible.${NC}"
+
+# Create an ansible.cfg file to ensure consistent vault password file usage
+cat > "${SCRIPT_DIR}/ansible.cfg" << EOF
+[defaults]
+vault_password_file = ${SCRIPT_DIR}/.vault_pass.txt
+host_key_checking = False
+
+[ssh_connection]
+pipelining = True
+EOF
+
+chmod 644 "${SCRIPT_DIR}/ansible.cfg"
+echo -e "${GREEN}Vault password configured for Ansible and ansible.cfg created.${NC}"
 
 echo -e "${YELLOW}Checking for required tools...${NC}"
 # Check for Terraform
@@ -122,12 +134,12 @@ if [[ $RUN_ANSIBLE =~ ^[Yy]$ ]]; then
     exit 1
   fi
 
-  # Run playbooks in order
+  # Run playbooks in order using the ansible.cfg file for vault password
   echo -e "${YELLOW}Running Ansible playbooks...${NC}"
-  ANSIBLE_VAULT_PASSWORD_FILE="../.vault_pass.txt" ansible-playbook -i inventory/hosts.yml adguard.yml
-  ANSIBLE_VAULT_PASSWORD_FILE="../.vault_pass.txt" ansible-playbook -i inventory/hosts.yml tailscale.yml
-  ANSIBLE_VAULT_PASSWORD_FILE="../.vault_pass.txt" ansible-playbook -i inventory/hosts.yml nginx_proxy_manager.yml
-  ANSIBLE_VAULT_PASSWORD_FILE="../.vault_pass.txt" ansible-playbook -i inventory/hosts.yml mediabox.yml
+  ansible-playbook -i inventory/hosts.yml adguard.yml
+  ansible-playbook -i inventory/hosts.yml tailscale.yml
+  ansible-playbook -i inventory/hosts.yml nginx_proxy_manager.yml
+  ansible-playbook -i inventory/hosts.yml mediabox.yml
 fi
 
 # Get IP addresses for the output message

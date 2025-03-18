@@ -22,7 +22,8 @@ resource "proxmox_lxc" "adguard" {
   start           = true
 
   provisioner "local-exec" {
-    command = "ansible-playbook -i ${var.ansible_inventory} ${var.ansible_playbooks.adguard} --vault-password-file .vault_pass.txt"
+    # Using ansible.cfg for vault password file
+    command = "ansible-playbook -i ${var.ansible_inventory} ${var.ansible_playbooks.adguard}"
   }
 
   # Ensure Ansible runs after variable file is created and encrypted
@@ -64,7 +65,8 @@ resource "proxmox_lxc" "tailscale" {
   start           = true
 
   provisioner "local-exec" {
-    command = "ansible-playbook -i ${var.ansible_inventory} ${var.ansible_playbooks.tailscale} --vault-password-file .vault_pass.txt"
+    # Using ansible.cfg for vault password file
+    command = "ansible-playbook -i ${var.ansible_inventory} ${var.ansible_playbooks.tailscale}"
   }
 
   lifecycle {
@@ -105,7 +107,8 @@ resource "proxmox_lxc" "nginx" {
   start           = true
 
   provisioner "local-exec" {
-    command = "ansible-playbook -i ${var.ansible_inventory} ${var.ansible_playbooks.nginx} --vault-password-file .vault_pass.txt"
+    # Using ansible.cfg for vault password file
+    command = "ansible-playbook -i ${var.ansible_inventory} ${var.ansible_playbooks.nginx}"
   }
 
   # Ensure Ansible runs after variable file is created and encrypted

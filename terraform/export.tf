@@ -6,10 +6,14 @@ resource "random_id" "ansible_vault_id" {
 resource "local_file" "ansible_vault_config" {
   content = <<-EOT
     [defaults]
-    vault_password_file = .vault_pass.txt
+    vault_password_file = ${abspath(path.module)}/../.vault_pass.txt
+    host_key_checking = False
     
     [vault]
     id = terraform-${random_id.ansible_vault_id.hex}
+    
+    [ssh_connection]
+    pipelining = True
   EOT
   filename        = "../ansible/ansible.cfg"
   file_permission = "0644"
@@ -36,6 +40,7 @@ resource "local_file" "tf_ansible_vars" {
   ]
 
   provisioner "local-exec" {
-    command = "cd ../ansible && ansible-vault encrypt tf_ansible_vars.yml --vault-id .vault_pass.txt"
+    # Using ansible.cfg for vault password file reference
+    command = "cd ../ansible && ansible-vault encrypt tf_ansible_vars.yml"
   }
 }

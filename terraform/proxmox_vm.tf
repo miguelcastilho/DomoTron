@@ -45,7 +45,8 @@ resource "proxmox_vm_qemu" "mediabox" {
 
   # Run the Ansible playbook for MediaBox
   provisioner "local-exec" {
-    command = "ansible-playbook -i ${var.ansible_inventory} ${var.ansible_playbooks.mediabox} --vault-password-file .vault_pass.txt"
+    # Using ansible.cfg for vault password file
+    command = "ansible-playbook -i ${var.ansible_inventory} ${var.ansible_playbooks.mediabox}"
   }
 
   lifecycle {
@@ -66,7 +67,8 @@ resource "proxmox_vm_qemu" "mediabox" {
 #### Proxmox host
 resource "null_resource" "execute_ansible_on_proxmox" {
   provisioner "local-exec" {
-    command = "ansible-playbook -i ${var.ansible_inventory} ${var.ansible_playbooks.proxmox} --vault-password-file .vault_pass.txt"
+    # Using ansible.cfg for vault password file
+    command = "ansible-playbook -i ${var.ansible_inventory} ${var.ansible_playbooks.proxmox}"
   }
   
   # Ensure this runs after the variables file is created
