@@ -6,4 +6,5 @@ terraform/.terraform.lock.hcl
 terraform/terraform.tfstate
 terraform/terraform.tfstate.backup
 terraform/terraform.tfvars
-terraform/.vault_pass.txt
+.vault_pass.txt
+ansible.cfg

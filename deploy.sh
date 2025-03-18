@@ -12,14 +12,17 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 # Print banner
 echo -e "${BLUE}"
-echo '______          _____            '
-echo '|  _  \        |_   _|           '
-echo '| | | |___  _ __ | |_ __ ___  _ __'
-echo '| | | / _ \| |_ \| | ._ / _ \| |_ \'
-echo '| |/ / (_) | | | | | | | (_) | | | |'
-echo '|___/ \___/|_| |_\_\_|  \___/|_| |_|'
+echo " ______   _______  _______  _______ _________ _______  _______  _       ";
+echo "(  __  \ (  ___  )(       )(  ___  )\__   __/(  ____ )(  ___  )( (    /|";
+echo "| (  \  )| (   ) || () () || (   ) |   ) (   | (    )|| (   ) ||  \  ( |";
+echo "| |   ) || |   | || || || || |   | |   | |   | (____)|| |   | ||   \ | |";
+echo "| |   | || |   | || |(_)| || |   | |   | |   |     __)| |   | || (\ \) |";
+echo "| |   ) || |   | || |   | || |   | |   | |   | (\ (   | |   | || | \   |";
+echo "| (__/  )| (___) || )   ( || (___) |   | |   | ) \ \__| (___) || )  \  |";
+echo "(______/ (_______)|/     \|(_______)   )_(   |/   \__/(_______)|/    )_)";
+echo "                                                                        ";
 echo -e "${NC}"
-echo -e "${GREEN}Automated Proxmox Infrastructure Deployment${NC}"
+echo -e "${GREEN}Automated Infrastructure Deployment${NC}"
 echo ""
 
 # Check configuration requirements
