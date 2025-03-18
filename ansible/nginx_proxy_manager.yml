@@ -1,6 +1,6 @@
 ---
 - name: Install Nginx and configure Certbot with DNS-01 Challenge
-  hosts: nginx_proxy
+  hosts: nginx_proxy_manager
   gather_facts: no
   any_errors_fatal: true
   vars_files:
@@ -15,4 +15,4 @@
       ansible.builtin.setup:
 
     - ansible.builtin.include_role:
-        name: nginx_proxy
+        name: nginx_proxy_manager
