@@ -1,5 +1,7 @@
 # DomoTron
 
+[![Validate Infrastructure](https://github.com/yourusername/DomoTron/actions/workflows/validate.yml/badge.svg)](https://github.com/yourusername/DomoTron/actions/workflows/validate.yml)
+
 ## Overview
 
 DomoTron is a project designed to automate the deployment and configuration of infrastructure on Proxmox using Terraform and Ansible. The Terraform scripts are used to provision the infrastructure, while Ansible is utilized to configure virtual machines (VMs) and Linux containers (LXC).
@@ -25,6 +27,7 @@ Before you begin, ensure you have the following installed:
 - [Terraform](https://www.terraform.io/downloads.html) v1.5.7 or newer
 - [Ansible](https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html) 2.12 or newer
 - [Proxmox VE](https://www.proxmox.com/en/)
+- [Python 3.8+](https://www.python.org/downloads/) (for the dynamic inventory script)
 - Cloudflare account (optional, for tunnels)
 - Tailscale account (optional, for secure networking)
 
@@ -37,31 +40,38 @@ Before you begin, ensure you have the following installed:
    cd DomoTron
    ```
 
-2. **Create Vault Password File:**
+2. **Initial Setup:**
 
-   Create a `.vault_pass.txt` file in the root directory with a secure password for Ansible Vault encryption.
+   Run the setup command to create necessary configuration files:
 
    ```bash
-   echo "your-secure-password" > .vault_pass.txt
-   chmod 600 .vault_pass.txt
+   make setup
    ```
+
+   This will create a vault password file and configure ansible.cfg.
 
 3. **Configure Variables:**
 
-   Copy `terraform.tfvars.example` to `terraform.tfvars` and edit with your environment-specific values.
+   ```bash
+   cd terraform/environments/prod
+   cp terraform.tfvars.example terraform.tfvars
+   ```
+
+   Edit `terraform.tfvars` with your environment-specific values.
 
 ## Quick Start
 
-To deploy the complete infrastructure with a single command, use the included deployment script:
+To deploy the complete infrastructure with a single command, use:
 
 ```bash
-./deploy.sh
+make deploy
 ```
 
-This script will:
-1. Run Terraform to provision infrastructure
-2. Securely pass variables to Ansible
-3. Execute Ansible playbooks to configure all services
+This will:
+1. Initialize Terraform
+2. Apply the Terraform plan
+3. Securely pass variables to Ansible
+4. Execute Ansible playbooks to configure all services
 
 ## Detailed Usage
 
@@ -70,18 +80,17 @@ This script will:
 1. **Initialize Terraform:**
 
    ```bash
-   cd terraform
-   terraform init
+   make init
    ```
 
 2. **Plan and Apply:**
 
    ```bash
-   terraform plan
-   terraform apply
+   make plan
+   make apply
    ```
 
-   Terraform will automatically:
+   Terraform will:
    - Create VMs and LXCs on Proxmox
    - Set up Cloudflare tunnels
    - Configure Tailscale networking
@@ -93,27 +102,34 @@ This script will:
 Terraform executes Ansible playbooks automatically after infrastructure provisioning, but you can also run them manually:
 
 ```bash
-cd ansible
-ansible-playbook -i inventory/hosts.yml mediabox.yml --vault-password-file ../.vault_pass.txt
+make provision  # Run all playbooks
+make provision-adguard  # Run only the AdGuard playbook
 ```
 
 ## Project Structure
 
-- **terraform/**: Infrastructure as code
-  - `providers.tf`: Provider configurations
-  - `proxmox_vm.tf`: VM definitions
-  - `proxmox_lxc.tf`: Container definitions
-  - `cloudflared.tf`: Cloudflare tunnel configuration
-  - `export.tf`: Exports variables to Ansible
-  
-- **ansible/**: Configuration management
-  - `roles/`: Service-specific roles
-  - `inventory/`: Host and group definitions
-  - Various playbooks (mediabox.yml, adguard.yml, etc.)
-  
-- **docs/**: Documentation
-  - `GETTING_STARTED.md`: Detailed guide for beginners
-  - `TERRAFORM_ANSIBLE_INTEGRATION.md`: Integration details
+The project is organized with a modular, environment-based structure:
+
+```
+project/
+├── ansible/              # Configuration management
+│   ├── inventory/        # Host and group variables
+│   ├── roles/            # Service-specific roles
+│   ├── site.yml          # Main playbook that includes all others
+│   └── *.yml             # Individual playbooks
+├── docs/                 # Documentation
+├── scripts/              # Utility scripts
+├── terraform/            # Infrastructure as code
+│   ├── environments/     # Environment-specific configurations
+│   │   ├── prod/         # Production environment
+│   │   └── dev/          # Development environment
+│   └── modules/          # Reusable Terraform modules
+│       ├── proxmox_vm/   # VM creation module
+│       ├── proxmox_lxc/  # LXC creation module
+│       └── ansible_integration/ # Ansible integration module
+├── .github/workflows/    # CI/CD pipelines
+└── Makefile              # Standardized commands
+```
 
 ## Provided Services
 
