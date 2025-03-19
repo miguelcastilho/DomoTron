@@ -1,0 +1,23 @@
+[defaults]
+# Inventory settings
+inventory = terraform_inventory.sh
+host_key_checking = False
+vault_password_file = ../.vault_pass.txt
+roles_path = ./roles
+retry_files_enabled = False
+force_color = True
+stdout_callback = yaml
+
+# Parallelism settings
+forks = 10
+
+[ssh_connection]
+pipelining = True
+ssh_args = -o ControlMaster=auto -o ControlPersist=60s -o StrictHostKeyChecking=no
+
+[diff]
+always = True
+context = 3
+
+[vault]
+id = domotron
