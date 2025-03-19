@@ -58,8 +58,7 @@ resource "proxmox_vm_qemu" "mediabox" {
 
   # Ensure Ansible runs after variable file is created and encrypted
   depends_on = [
-    local_file.tf_ansible_vars,
-    local_file.ansible_vault_config
+    local_file.tf_ansible_vars
   ]
 }
 
@@ -73,7 +72,6 @@ resource "null_resource" "execute_ansible_on_proxmox" {
   
   # Ensure this runs after the variables file is created
   depends_on = [
-    local_file.tf_ansible_vars,
-    local_file.ansible_vault_config
+    local_file.tf_ansible_vars
   ]
 }

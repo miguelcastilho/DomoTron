@@ -1,22 +1,9 @@
-resource "random_id" "ansible_vault_id" {
-  byte_length = 8
-}
-
-# This resource creates a secure config for Ansible execution
-resource "local_file" "ansible_vault_config" {
-  content = <<-EOT
-    [defaults]
-    vault_password_file = ${abspath(path.module)}/../.vault_pass.txt
-    host_key_checking = False
-    
-    [vault]
-    id = terraform-${random_id.ansible_vault_id.hex}
-    
-    [ssh_connection]
-    pipelining = True
-  EOT
-  filename        = "../ansible/ansible.cfg"
-  file_permission = "0644"
+# This resource checks for the existence of the ansible.cfg file
+resource "null_resource" "check_ansible_cfg" {
+  # Verify that ansible.cfg exists, fail if it doesn't
+  provisioner "local-exec" {
+    command = "[ -f \"${abspath(path.module)}/../ansible/ansible.cfg\" ] || (echo \"ERROR: ansible/ansible.cfg not found. Run 'make setup' first.\" && exit 1)"
+  }
 }
 
 # Generate tf_ansible_vars.yml with properly structured and sensitive variables
@@ -40,7 +27,7 @@ resource "local_file" "tf_ansible_vars" {
   ]
 
   provisioner "local-exec" {
-    # Using ansible.cfg for vault password file reference
+    # Using the common ansible.cfg
     command = "cd ../ansible && ansible-vault encrypt tf_ansible_vars.yml"
   }
 }
