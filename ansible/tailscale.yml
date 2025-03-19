@@ -5,22 +5,30 @@
   any_errors_fatal: true
   become: true
   tasks:
-    - name: Modify lxc conf file
-      ansible.builtin.blockinfile:
+    - name: Ensure lxc.cgroup2.devices.allow is configured
+      ansible.builtin.lineinfile:
         path: /etc/pve/lxc/102.conf
-        block: |
-          lxc.cgroup2.devices.allow: c 10:200 rwm
-          lxc.mount.entry: /dev/net/tun dev/net/tun none bind,create=file
+        regexp: '^lxc\.cgroup2\.devices\.allow:'
+        line: 'lxc.cgroup2.devices.allow: c 10:200 rwm'
         insertafter: EOF
+      notify: Restart container
 
+    - name: Ensure lxc.mount.entry for /dev/tun is configured
+      ansible.builtin.lineinfile:
+        path: /etc/pve/lxc/102.conf
+        regexp: '^lxc\.mount\.entry: /dev/net/tun'
+        line: 'lxc.mount.entry: /dev/net/tun dev/net/tun none bind,create=file'
+        insertafter: EOF
+      notify: Restart container
+
+  handlers:
     - name: Restart container
       ansible.builtin.shell: |
-        lxc-stop 102
-        lxc-start 102
+        lxc-stop 102 && lxc-start 102
 
-    - name: Wait for changes to apply
-      ansible.builtin.pause:
-        seconds: 120
+    # - name: Wait for changes to apply
+    #   ansible.builtin.pause:
+    #     seconds: 120
 
 - name: Configure tailscale
   hosts: tailscale
@@ -68,15 +76,28 @@
         state: stopped
         enabled: false
 
-    - name: Optimize for subenet routers and exit nodes
-      ansible.builtin.shell: |
-        set -o pipefail
-        NETDEV=$(ip route show 0/0 | cut -f5 -d' ')
-        ethtool -K $NETDEV rx-udp-gro-forwarding on rx-gro-list off
-        printf '#!/bin/sh\n\nethtool -K %s rx-udp-gro-forwarding on rx-gro-list off \n' "$(ip route show 0/0 | cut -f5 -d" ")" | tee /etc/networkd-dispatcher/routable.d/50-tailscale
-        chmod 755 /etc/networkd-dispatcher/routable.d/50-tailscale
+    - name: Configure immediate ethtool settings
+      ansible.builtin.shell: "ethtool -K {{ ansible_default_ipv4.interface }} rx-udp-gro-forwarding on rx-gro-list off"
+      changed_when: false
 
-    - name: Enable IP forwarding
+    - name: Create network dispatcher script for tailscale optimization
+      ansible.builtin.copy:
+        dest: /etc/networkd-dispatcher/routable.d/50-tailscale
+        content: |
+          #!/bin/sh
+
+          ethtool -K {{ ansible_default_ipv4.interface }} rx-udp-gro-forwarding on rx-gro-list off
+        mode: '0755'
+
+    # - name: Optimize for subenet routers and exit nodes
+    #   ansible.builtin.shell: |
+    #     set -o pipefail
+    #     NETDEV=$(ip route show 0/0 | cut -f5 -d' ')
+    #     ethtool -K $NETDEV rx-udp-gro-forwarding on rx-gro-list off
+    #     printf '#!/bin/sh\n\nethtool -K %s rx-udp-gro-forwarding on rx-gro-list off \n' "$(ip route show 0/0 | cut -f5 -d" ")" | tee /etc/networkd-dispatcher/routable.d/50-tailscale
+    #     chmod 755 /etc/networkd-dispatcher/routable.d/50-tailscale
+
+    - name: Enable IP forwarding for tailscale
       ansible.builtin.lineinfile:
         path: /etc/sysctl.d/99-tailscale.conf
         line: "{{ item }}"
@@ -88,21 +109,41 @@
         - "net.ipv6.conf.all.forwarding = 1"
       notify: Reload sysctl
 
-    - name: Install tailscale
-      ansible.builtin.shell: |
-        set -o pipefail
-        curl -fsSL https://tailscale.com/install.sh | sh
+    - name: Check if tailscale is installed
+      ansible.builtin.shell: "command -v tailscale"
+      register: tailscale_check
+      changed_when: false
+      ignore_errors: true
 
-    - ansible.builtin.set_fact:
+    - name: Install tailscale if not present
+      ansible.builtin.shell: "curl -fsSL https://tailscale.com/install.sh | sh"
+      when: tailscale_check.rc != 0
+
+    - name: Set network fact for tailscale configuration
+      ansible.builtin.set_fact:
         ip_network: "{{ ansible_default_ipv4.address }}/{{ ansible_default_ipv4.netmask }}"
 
-    - ansible.builtin.set_fact:
+    - name: Set tailscale advertise routes
+      ansible.builtin.set_fact:
         tailscale_advertise_routes: "{{ ip_network | ansible.utils.ipaddr('network/prefix') }}"
 
-    - name: Run tailscale
-      ansible.builtin.shell: |
-        tailscale up --authkey={{ tf_tailscale_authkey }} --advertise-routes={{ tailscale_advertise_routes }} --hostname={{ tailscale_hostname }}
+    - name: Create tailscale configuration file
+      ansible.builtin.copy:
+        dest: /etc/tailscale_config
+        content: |
+          authkey: {{ tf_tailscale_authkey }}
+          advertise_routes: {{ tailscale_advertise_routes }}
+          hostname: {{ tailscale_hostname }}
+        mode: '0644'
+      notify: Run tailscale up
+
+    # - name: Run tailscale
+    #   ansible.builtin.shell: |
+    #     tailscale up --authkey={{ tf_tailscale_authkey }} --advertise-routes={{ tailscale_advertise_routes }} --hostname={{ tailscale_hostname }}
 
   handlers:
     - name: Reload sysctl
       ansible.builtin.command: sysctl -p /etc/sysctl.d/99-tailscale.conf
+
+    - name: Run tailscale up
+      ansible.builtin.shell: "tailscale up --authkey={{ tf_tailscale_authkey }} --advertise-routes={{ tailscale_advertise_routes }} --hostname={{ tailscale_hostname }}"
