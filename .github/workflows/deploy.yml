@@ -1,0 +1,140 @@
+name: Deploy Infrastructure
+
+on:
+  push:
+    branches: [ deploy ]
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to deploy to'
+        required: true
+        default: 'prod'
+        type: choice
+        options:
+          - prod
+          - dev
+
+jobs:
+  validate:
+    name: Validate Infrastructure
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+      
+      - name: Run Validation Workflow
+        uses: ./.github/workflows/validate.yml
+  
+  plan:
+    name: Plan Deployment
+    runs-on: ubuntu-latest
+    needs: validate
+    defaults:
+      run:
+        working-directory: ./terraform/environments/${{ github.event.inputs.environment || 'prod' }}
+    
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+      
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: 1.5.7
+          terraform_wrapper: false
+      
+      - name: Terraform Init
+        run: terraform init
+        env:
+          # These would be set as GitHub secrets
+          TF_VAR_proxmox_api_token_id: ${{ secrets.TF_VAR_PROXMOX_API_TOKEN_ID }}
+          TF_VAR_proxmox_api_token_secret: ${{ secrets.TF_VAR_PROXMOX_API_TOKEN_SECRET }}
+      
+      - name: Terraform Plan
+        run: terraform plan -out=tfplan
+        env:
+          # These would be set as GitHub secrets
+          TF_VAR_proxmox_api_token_id: ${{ secrets.TF_VAR_PROXMOX_API_TOKEN_ID }}
+          TF_VAR_proxmox_api_token_secret: ${{ secrets.TF_VAR_PROXMOX_API_TOKEN_SECRET }}
+          TF_VAR_cloudflare_token: ${{ secrets.TF_VAR_CLOUDFLARE_TOKEN }}
+          TF_VAR_cloudflare_zone_id: ${{ secrets.TF_VAR_CLOUDFLARE_ZONE_ID }}
+          TF_VAR_cloudflare_account_id: ${{ secrets.TF_VAR_CLOUDFLARE_ACCOUNT_ID }}
+          TF_VAR_tailscale_api_key: ${{ secrets.TF_VAR_TAILSCALE_API_KEY }}
+          TF_VAR_ssh_public_key: ${{ secrets.TF_VAR_SSH_PUBLIC_KEY }}
+      
+      - name: Upload Terraform Plan
+        uses: actions/upload-artifact@v3
+        with:
+          name: terraform-plan
+          path: terraform/environments/${{ github.event.inputs.environment || 'prod' }}/tfplan
+          retention-days: 1
+  
+  apply:
+    name: Apply Deployment
+    runs-on: ubuntu-latest
+    needs: plan
+    environment: ${{ github.event.inputs.environment || 'prod' }}
+    defaults:
+      run:
+        working-directory: ./terraform/environments/${{ github.event.inputs.environment || 'prod' }}
+    
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+      
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: 1.5.7
+          terraform_wrapper: false
+      
+      - name: Setup Ansible
+        run: |
+          sudo apt-add-repository --yes --update ppa:ansible/ansible
+          sudo apt install ansible -y
+      
+      - name: Create Vault Password
+        run: |
+          echo "${{ secrets.ANSIBLE_VAULT_PASSWORD }}" > .vault_password
+          chmod 600 .vault_password
+      
+      - name: Download Terraform Plan
+        uses: actions/download-artifact@v3
+        with:
+          name: terraform-plan
+          path: terraform/environments/${{ github.event.inputs.environment || 'prod' }}
+      
+      - name: Terraform Init
+        run: terraform init
+        env:
+          # These would be set as GitHub secrets
+          TF_VAR_proxmox_api_token_id: ${{ secrets.TF_VAR_PROXMOX_API_TOKEN_ID }}
+          TF_VAR_proxmox_api_token_secret: ${{ secrets.TF_VAR_PROXMOX_API_TOKEN_SECRET }}
+      
+      - name: Terraform Apply
+        run: terraform apply -auto-approve tfplan
+        env:
+          # These would be set as GitHub secrets
+          TF_VAR_proxmox_api_token_id: ${{ secrets.TF_VAR_PROXMOX_API_TOKEN_ID }}
+          TF_VAR_proxmox_api_token_secret: ${{ secrets.TF_VAR_PROXMOX_API_TOKEN_SECRET }}
+          TF_VAR_cloudflare_token: ${{ secrets.TF_VAR_CLOUDFLARE_TOKEN }}
+          TF_VAR_cloudflare_zone_id: ${{ secrets.TF_VAR_CLOUDFLARE_ZONE_ID }}
+          TF_VAR_cloudflare_account_id: ${{ secrets.TF_VAR_CLOUDFLARE_ACCOUNT_ID }}
+          TF_VAR_tailscale_api_key: ${{ secrets.TF_VAR_TAILSCALE_API_KEY }}
+          TF_VAR_ssh_public_key: ${{ secrets.TF_VAR_SSH_PUBLIC_KEY }}
+      
+      - name: Create Deployment Summary
+        id: summary
+        run: |
+          terraform output -json servers > servers.json
+          echo "### Deployment Complete! :rocket:" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Server | IP Address | Roles |" >> $GITHUB_STEP_SUMMARY
+          echo "|--------|------------|-------|" >> $GITHUB_STEP_SUMMARY
+          
+          for server in $(jq -r 'keys[]' servers.json); do
+            ip=$(jq -r ".$server.ip" servers.json)
+            roles=$(jq -r ".$server.roles | join(\", \")" servers.json)
+            echo "| $server | $ip | $roles |" >> $GITHUB_STEP_SUMMARY
+          done
