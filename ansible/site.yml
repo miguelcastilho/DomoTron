@@ -1,0 +1,29 @@
+---
+# Main playbook that includes all others
+- name: Apply common configuration to all nodes
+  hosts: all
+  gather_facts: no
+  any_errors_fatal: true
+  tasks:
+    - name: Wait for system to become reachable
+      ansible.builtin.wait_for_connection:
+      register: connection_result
+      
+    - name: Gather facts for the first time
+      ansible.builtin.setup:
+      when: connection_result is success
+
+- name: Include AdGuard playbook
+  ansible.builtin.import_playbook: adguard.yml
+
+- name: Include Tailscale playbook
+  ansible.builtin.import_playbook: tailscale.yml
+
+- name: Include Nginx Proxy Manager playbook
+  ansible.builtin.import_playbook: nginx_proxy_manager.yml
+
+- name: Include MediaBox playbook
+  ansible.builtin.import_playbook: mediabox.yml
+
+- name: Include Proxmox playbook
+  ansible.builtin.import_playbook: proxmox.yml
