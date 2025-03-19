@@ -37,7 +37,7 @@ if [ ! -f "${SCRIPT_DIR}/terraform/terraform.tfvars" ]; then
 fi
 
 # Check/create vault password file
-if [ ! -f "${SCRIPT_DIR}/.vault_pass.txt" ]; then
+if [ ! -f "${SCRIPT_DIR}/.vault_password" ]; then
   echo -e "${YELLOW}Vault password file not found. Creating a new one...${NC}"
   echo "Please enter a strong password for Ansible Vault encryption (press Enter to auto-generate):"
   read -s VAULT_PASS
@@ -53,22 +53,22 @@ if [ ! -f "${SCRIPT_DIR}/.vault_pass.txt" ]; then
       VAULT_PASS=$(cat /dev/urandom | LC_ALL=C tr -dc 'a-zA-Z0-9!@#$%^&*()_+?><~' | head -c 32)
     fi
     echo -e "${GREEN}Secure password generated!${NC}"
-    echo -e "${YELLOW}Important: This password will not be shown again. It is securely stored in .vault_pass.txt${NC}"
+    echo -e "${YELLOW}Important: This password will not be shown again. It is securely stored in .vault_password${NC}"
   fi
   
   # Write the password to the vault file
-  echo "$VAULT_PASS" > "${SCRIPT_DIR}/.vault_pass.txt"
-  chmod 600 "${SCRIPT_DIR}/.vault_pass.txt"
+  echo "$VAULT_PASS" > "${SCRIPT_DIR}/.vault_password"
+  chmod 600 "${SCRIPT_DIR}/.vault_password"
   echo -e "${GREEN}Vault password file created!${NC}"
 fi
 
 # Export environment variables
-export ANSIBLE_VAULT_PASSWORD_FILE="${SCRIPT_DIR}/.vault_pass.txt"
+export ANSIBLE_VAULT_PASSWORD_FILE="${SCRIPT_DIR}/.vault_password"
 
 # Create an ansible.cfg file to ensure consistent vault password file usage
 cat > "${SCRIPT_DIR}/ansible.cfg" << EOF
 [defaults]
-vault_password_file = ${SCRIPT_DIR}/.vault_pass.txt
+vault_password_file = ${SCRIPT_DIR}/.vault_password
 host_key_checking = False
 
 [ssh_connection]
