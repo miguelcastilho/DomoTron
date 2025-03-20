@@ -7,4 +7,4 @@ terraform/terraform.tfstate
 terraform/terraform.tfstate.backup
 terraform/terraform.tfvars
 .vault_password
-ansible/ansible.cfg
+ansible.cfg

@@ -22,7 +22,6 @@ resource "proxmox_lxc" "adguard" {
   start           = true
 
   provisioner "local-exec" {
-    # Using the common ansible.cfg
     command = "ansible-playbook -i ${var.ansible_inventory} ${var.ansible_playbooks.adguard}"
   }
 
@@ -64,7 +63,6 @@ resource "proxmox_lxc" "tailscale" {
   start           = true
 
   provisioner "local-exec" {
-    # Using the common ansible.cfg
     command = "ansible-playbook -i ${var.ansible_inventory} ${var.ansible_playbooks.tailscale}"
   }
 
@@ -105,7 +103,6 @@ resource "proxmox_lxc" "nginx" {
   start           = true
 
   provisioner "local-exec" {
-    # Using the common ansible.cfg
     command = "ansible-playbook -i ${var.ansible_inventory} ${var.ansible_playbooks.nginx}"
   }
 

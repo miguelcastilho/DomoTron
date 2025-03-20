@@ -15,34 +15,34 @@ env-check:
 		echo -e "$(RED)Error: .vault_password not found. Run 'make setup' first.$(NC)"; \
 		exit 1; \
 	fi
-	@if [ ! -f ansible/ansible.cfg ]; then \
-		echo -e "$(RED)Error: ansible/ansible.cfg not found. Run 'make setup' first.$(NC)"; \
+	@if [ ! -f ansible.cfg ]; then \
+		echo -e "$(RED)Error: ansible.cfg not found. Run 'make setup' first.$(NC)"; \
 		exit 1; \
 	fi
 
-# Create ansible/ansible.cfg
+# Create ansible.cfg
 ansible-config:
-	@echo -e "$(GREEN)Creating ansible/ansible.cfg...$(NC)"
-	@echo "[defaults]" > ansible/ansible.cfg
-	@echo "inventory = terraform_inventory.sh" >> ansible/ansible.cfg
-	@echo "vault_password_file = $(shell pwd)/.vault_password" >> ansible/ansible.cfg
-	@echo "host_key_checking = False" >> ansible/ansible.cfg
-	@echo "roles_path = ./roles" >> ansible/ansible.cfg
-	@echo "retry_files_enabled = False" >> ansible/ansible.cfg
-	@echo "force_color = True" >> ansible/ansible.cfg
-	@echo "stdout_callback = yaml" >> ansible/ansible.cfg
-	@echo "" >> ansible/ansible.cfg
-	@echo "# Parallelism settings" >> ansible/ansible.cfg
-	@echo "forks = 10" >> ansible/ansible.cfg
-	@echo "" >> ansible/ansible.cfg
-	@echo "[ssh_connection]" >> ansible/ansible.cfg
-	@echo "pipelining = True" >> ansible/ansible.cfg
-	@echo "ssh_args = -o ControlMaster=auto -o ControlPersist=60s -o StrictHostKeyChecking=no" >> ansible/ansible.cfg
-	@echo "" >> ansible/ansible.cfg
-	@echo "[diff]" >> ansible/ansible.cfg
-	@echo "always = True" >> ansible/ansible.cfg
-	@echo "context = 3" >> ansible/ansible.cfg
-	@chmod 644 ansible/ansible.cfg
+	@echo -e "$(GREEN)Creating ansible.cfg...$(NC)"
+	@echo "[defaults]" > $(shell pwd)/ansible.cfg
+	@echo "inventory = $(shell pwd)/ansible/terraform_inventory.sh" >> ansible.cfg
+	@echo "vault_password_file = $(shell pwd)/.vault_password" >> ansible.cfg
+	@echo "host_key_checking = False" >> ansible.cfg
+	@echo "roles_path = $(shell pwd)/ansible/roles" >> ansible.cfg
+	@echo "retry_files_enabled = False" >> ansible.cfg
+	@echo "force_color = True" >> ansible.cfg
+	@echo "stdout_callback = yaml" >> ansible.cfg
+	@echo "" >> ansible.cfg
+	@echo "# Parallelism settings" >> ansible.cfg
+	@echo "forks = 10" >> ansible.cfg
+	@echo "" >> ansible.cfg
+	@echo "[ssh_connection]" >> ansible.cfg
+	@echo "pipelining = True" >> ansible.cfg
+	@echo "ssh_args = -o ControlMaster=auto -o ControlPersist=60s -o StrictHostKeyChecking=no" >> ansible.cfg
+	@echo "" >> ansible.cfg
+	@echo "[diff]" >> ansible.cfg
+	@echo "always = True" >> ansible.cfg
+	@echo "context = 3" >> ansible.cfg
+	@chmod 644 ansible.cfg
 
 # Initial setup
 setup:

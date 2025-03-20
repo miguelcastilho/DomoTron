@@ -38,10 +38,10 @@ variable "dependencies" {
 resource "local_file" "ansible_config" {
   content = <<-EOT
     [defaults]
-    inventory = terraform_inventory.sh
+    inventory = ${var.project_root}/ansible/terraform_inventory.sh
     vault_password_file = ${var.project_root}/${var.vault_password_file}
     host_key_checking = False
-    roles_path = ./roles
+    roles_path = ${var.project_root}/ansible/roles
     retry_files_enabled = False
     force_color = True
     stdout_callback = yaml
@@ -57,7 +57,7 @@ resource "local_file" "ansible_config" {
     always = True
     context = 3
   EOT
-  filename        = "${var.project_root}/ansible/ansible.cfg"
+  filename        = "${var.project_root}/ansible.cfg"
   file_permission = "0644"
 }
 

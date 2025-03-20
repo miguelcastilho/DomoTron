@@ -2,7 +2,7 @@
 resource "null_resource" "check_ansible_cfg" {
   # Verify that ansible.cfg exists, fail if it doesn't
   provisioner "local-exec" {
-    command = "[ -f \"${abspath(path.module)}/../ansible/ansible.cfg\" ] || (echo \"ERROR: ansible/ansible.cfg not found. Run 'make setup' first.\" && exit 1)"
+    command = "[ -f \"${abspath(path.module)}/../ansible.cfg\" ] || (echo \"ERROR: ansible.cfg not found. Run 'make setup' first.\" && exit 1)"
   }
 }
 
@@ -27,7 +27,6 @@ resource "local_file" "tf_ansible_vars" {
   ]
 
   provisioner "local-exec" {
-    # Using the common ansible.cfg
-    command = "cd ../ansible && ansible-vault encrypt tf_ansible_vars.yml"
+    command = "ansible-vault encrypt ${path.module}/../ansible/tf_ansible_vars.yml"
   }
 }

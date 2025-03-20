@@ -68,11 +68,24 @@ export ANSIBLE_VAULT_PASSWORD_FILE="${SCRIPT_DIR}/.vault_password"
 # Create an ansible.cfg file to ensure consistent vault password file usage
 cat > "${SCRIPT_DIR}/ansible.cfg" << EOF
 [defaults]
+inventory = ${SCRIPT_DIR}/ansible/terraform_inventory.sh
 vault_password_file = ${SCRIPT_DIR}/.vault_password
 host_key_checking = False
+roles_path = ${SCRIPT_DIR}/ansible/roles
+retry_files_enabled = False
+force_color = True
+stdout_callback = yaml
+
+# Parallelism settings
+forks = 10
 
 [ssh_connection]
 pipelining = True
+ssh_args = -o ControlMaster=auto -o ControlPersist=60s -o StrictHostKeyChecking=no
+
+[diff]
+always = True
+context = 3
 EOF
 
 chmod 644 "${SCRIPT_DIR}/ansible.cfg"

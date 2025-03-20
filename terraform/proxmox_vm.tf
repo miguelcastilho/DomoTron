@@ -45,7 +45,6 @@ resource "proxmox_vm_qemu" "mediabox" {
 
   # Run the Ansible playbook for MediaBox
   provisioner "local-exec" {
-    # Using ansible.cfg for vault password file
     command = "ansible-playbook -i ${var.ansible_inventory} ${var.ansible_playbooks.mediabox}"
   }
 
@@ -66,7 +65,6 @@ resource "proxmox_vm_qemu" "mediabox" {
 #### Proxmox host
 resource "null_resource" "execute_ansible_on_proxmox" {
   provisioner "local-exec" {
-    # Using ansible.cfg for vault password file
     command = "ansible-playbook -i ${var.ansible_inventory} ${var.ansible_playbooks.proxmox}"
   }
   
