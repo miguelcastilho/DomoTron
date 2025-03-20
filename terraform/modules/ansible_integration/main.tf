@@ -50,7 +50,7 @@ resource "local_file" "ansible_config" {
     forks = 10
        
     [ssh_connection]
-    pipelining = True
+    pipelining = False
     ssh_args = -o ControlMaster=auto -o ControlPersist=60s -o StrictHostKeyChecking=no
 
     [diff]

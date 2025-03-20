@@ -36,7 +36,7 @@ ansible-config:
 	@echo "forks = 10" >> ansible.cfg
 	@echo "" >> ansible.cfg
 	@echo "[ssh_connection]" >> ansible.cfg
-	@echo "pipelining = True" >> ansible.cfg
+	@echo "pipelining = False" >> ansible.cfg
 	@echo "ssh_args = -o ControlMaster=auto -o ControlPersist=60s -o StrictHostKeyChecking=no" >> ansible.cfg
 	@echo "" >> ansible.cfg
 	@echo "[diff]" >> ansible.cfg
