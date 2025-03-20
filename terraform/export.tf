@@ -1,1 +1,0 @@
-# This resource is now replaced by the ansible_integration module in main.tf
