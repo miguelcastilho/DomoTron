@@ -1,4 +1,4 @@
-.PHONY: init plan apply provision clean validate test help setup env-check ansible-config
+.PHONY: init plan apply provision clean validate help setup env-check ansible-config
 
 # Colors
 GREEN = \033[0;32m
@@ -9,20 +9,20 @@ NC = \033[0m # No Color
 # Default target
 .DEFAULT_GOAL := help
 
-# Check if vault password file exists
+# Check if vault password file and ansible.cfg exist
 env-check:
 	@if [ ! -f terraform/.vault_password ]; then \
-		echo -e "$(RED)Error: terraform/.vault_password not found. Run 'make setup' first.$(NC)"; \
+		printf "$(RED)Error: terraform/.vault_password not found. Run 'make setup' first.$(NC)\n"; \
 		exit 1; \
 	fi
 	@if [ ! -f terraform/ansible.cfg ]; then \
-		echo -e "$(RED)Error: ansible.cfg not found. Run 'make setup' first.$(NC)"; \
+		printf "$(RED)Error: ansible.cfg not found. Run 'make setup' first.$(NC)\n"; \
 		exit 1; \
 	fi
 
 # Create ansible.cfg
 ansible-config:
-	@echo -e "$(YELLOW)Creating terraform/ansible.cfg...$(NC)"
+	@printf "$(YELLOW)Creating terraform/ansible.cfg...$(NC)\n"
 	@echo "[defaults]" > $(shell pwd)/terraform/ansible.cfg
 	@echo "inventory = $(shell pwd)/ansible/terraform_inventory.sh" >> terraform/ansible.cfg
 	@echo "vault_password_file = $(shell pwd)/terraform/.vault_password" >> terraform/ansible.cfg
@@ -43,108 +43,104 @@ ansible-config:
 	@echo "always = True" >> terraform/ansible.cfg
 	@echo "context = 3" >> terraform/ansible.cfg
 	@chmod 644 terraform/ansible.cfg
+	@printf "$(GREEN)File terraform/ansible.cfg created!$(NC)\n"
 
 # Initial setup
 setup:
-	@echo -e "$(YELLOW)Creating vault password file...$(NC)"
+	@printf "$(YELLOW)Creating vault password file...$(NC)\n"
 	@if [ ! -f terraform/.vault_password ]; then \
-		echo "Please enter a strong password for Ansible Vault encryption (press Enter to auto-generate):"; \
+		printf "Please enter a strong password for Ansible Vault encryption (press Enter to auto-generate):\n"; \
 		read -s VAULT_PASS; \
 		if [ -z "$$VAULT_PASS" ]; then \
-			echo -e "$(YELLOW)Generating a secure random password...$(NC)"; \
+			printf "$(YELLOW)Generating a secure random password...$(NC)\n"; \
 			if command -v openssl &> /dev/null; then \
 				VAULT_PASS=$$(openssl rand -base64 24); \
 			else \
 				VAULT_PASS=$$(cat /dev/urandom | LC_ALL=C tr -dc 'a-zA-Z0-9!@#$%^&*()_+?><~' | head -c 32); \
 			fi; \
-			echo -e "$(GREEN)Secure password generated!$(NC)"; \
-			echo -e "$(YELLOW)Important: This password will not be shown again. It is securely stored in terraform/.vault_password$(NC)"; \
+			printf "$(GREEN)Secure password generated!$(NC)\n"; \
+			printf "$(YELLOW)Important: This password will not be shown again. It is securely stored in terraform/.vault_password$(NC)\n"; \
 		fi; \
 		echo "$$VAULT_PASS" > terraform/.vault_password; \
 		chmod 600 terraform/.vault_password; \
-		echo -e "$(GREEN)Vault password file created!$(NC)"; \
+		printf "$(GREEN)Vault password file created!$(NC)\n"; \
 	else \
-		echo -e "$(GREEN)Vault password file already exists.$(NC)"; \
+		printf "$(GREEN)Vault password file already exists.$(NC)\n"; \
 	fi
 	@$(MAKE) ansible-config
-	@echo -e "$(GREEN)Setup completed successfully!$(NC)"
+	@printf "$(GREEN)\nSetup completed successfully!$(NC)\n"
 
 # Terraform commands
 init: env-check
-	@echo -e "$(YELLOW)Initializing Terraform...$(NC)"
+	@printf "$(YELLOW)Initializing Terraform...$(NC)\n"
 	cd terraform && terraform init
 
 plan: env-check init
-	@echo -e "$(YELLOW)Creating Terraform plan...$(NC)"
+	@printf "$(YELLOW)Creating Terraform plan...$(NC)\n"
 	cd terraform && terraform plan -out=tfplan
 
 apply: env-check plan
-	@echo -e "$(YELLOW)Applying Terraform changes...$(NC)"
+	@printf "$(YELLOW)Applying Terraform changes...$(NC)\n"
 	cd terraform && terraform apply tfplan
 
 # Ansible commands
 ansible-requirements: env-check
-	@echo -e "$(YELLOW)Installing Ansible requirements...$(NC)"
+	@printf "$(YELLOW)Installing Ansible requirements...$(NC)\n"
 	ansible-galaxy collection install -r ansible/requirements.yml
 
 provision: env-check
-	@echo -e "$(YELLOW)Provisioning infrastructure with Ansible...$(NC)"
-	cd ansible && ansible-playbook -i inventory/hosts.yml site.yml
+	@printf "$(YELLOW)Provisioning infrastructure with Ansible...$(NC)\n"
+	cd ansible && ansible-playbook -i terraform_inventory.sh site.yml
 
 provision-adguard: env-check
-	@echo -e "$(YELLOW)Provisioning AdGuard...$(NC)"
-	cd ansible && ansible-playbook -i inventory/hosts.yml adguard.yml
+	@printf "$(YELLOW)Provisioning AdGuard...$(NC)\n"
+	cd ansible && ansible-playbook -i terraform_inventory.sh adguard.yml
 
 provision-mediabox: env-check
-	@echo -e "$(YELLOW)Provisioning MediaBox...$(NC)"
-	cd ansible && ansible-playbook -i inventory/hosts.yml mediabox.yml
+	@printf "$(YELLOW)Provisioning MediaBox...$(NC)\n"
+	cd ansible && ansible-playbook -i terraform_inventory.sh mediabox.yml
 
 provision-nginx: env-check
-	@echo -e "$(YELLOW)Provisioning Nginx Proxy Manager...$(NC)"
-	cd ansible && ansible-playbook -i inventory/hosts.yml nginx_proxy_manager.yml
+	@printf "$(YELLOW)Provisioning Nginx Proxy Manager...$(NC)\n"
+	cd ansible && ansible-playbook -i terraform_inventory.sh nginx_proxy_manager.yml
 
 provision-tailscale: env-check
-	@echo -e "$(YELLOW)Provisioning Tailscale...$(NC)"
-	cd ansible && ansible-playbook -i inventory/hosts.yml tailscale.yml
+	@printf "$(YELLOW)Provisioning Tailscale...$(NC)\n"
+	cd ansible && ansible-playbook -i terraform_inventory.sh tailscale.yml
 
 # Validation
 validate: env-check
-	@echo -e "$(YELLOW)Validating Terraform configuration...$(NC)"
+	@printf "$(YELLOW)Validating Terraform configuration...$(NC)\n"
 	cd terraform && terraform validate
-	@echo -e "$(YELLOW)Validating Ansible playbooks...$(NC)"
-	cd ansible && ansible-playbook -i inventory/hosts.yml --syntax-check site.yml adguard.yml mediabox.yml nginx_proxy_manager.yml tailscale.yml proxmox.yml update.yml
-
-# Testing
-test: env-check validate
-	@echo -e "$(YELLOW)Running tests...$(NC)"
-	@echo -e "$(GREEN)All tests passed!$(NC)"
+	@printf "$(YELLOW)Validating Ansible playbooks...$(NC)\n"
+	ansible-playbook -i ansible/terraform_inventory.sh --syntax-check ansible/site.yml ansible/adguard.yml ansible/mediabox.yml ansible/nginx_proxy_manager.yml ansible/tailscale.yml ansible/proxmox.yml ansible/update.yml
 
 # Clean up
 clean:
-	@echo -e "$(YELLOW)Cleaning up...$(NC)"
+	@printf "$(YELLOW)Cleaning up...$(NC)\n"
 	rm -f terraform/tfplan
 	find . -name "*.retry" -delete
-	@echo -e "$(GREEN)Clean up completed!$(NC)"
+	@printf "$(GREEN)Clean up completed!$(NC)\n"
 
 # Full deployment
 deploy: env-check init apply
-	@echo -e "$(GREEN)Deployment completed successfully!$(NC)"
+	@printf "$(GREEN)Deployment completed successfully!$(NC)\n"
 
 # Help
 help:
-	@echo -e "$(GREEN)DomoTron Makefile Commands:$(NC)"
-	@echo -e "  $(YELLOW)setup$(NC)              - Initial setup (vault password, ansible.cfg)"
-	@echo -e "  $(YELLOW)init$(NC)               - Initialize Terraform"
-	@echo -e "  $(YELLOW)plan$(NC)               - Create Terraform execution plan"
-	@echo -e "  $(YELLOW)apply$(NC)              - Apply Terraform changes"
-	@echo -e "  $(YELLOW)ansible-requirements$(NC) - Install Ansible requirements"
-	@echo -e "  $(YELLOW)provision$(NC)          - Run all Ansible playbooks"
-	@echo -e "  $(YELLOW)provision-adguard$(NC)  - Run AdGuard playbook"
-	@echo -e "  $(YELLOW)provision-mediabox$(NC) - Run MediaBox playbook"
-	@echo -e "  $(YELLOW)provision-nginx$(NC)    - Run Nginx Proxy Manager playbook"
-	@echo -e "  $(YELLOW)provision-tailscale$(NC) - Run Tailscale playbook"
-	@echo -e "  $(YELLOW)validate$(NC)           - Validate Terraform and Ansible configurations"
-	@echo -e "  $(YELLOW)test$(NC)               - Run tests"
-	@echo -e "  $(YELLOW)clean$(NC)              - Clean up generated files"
-	@echo -e "  $(YELLOW)deploy$(NC)             - Complete deployment"
-	@echo -e "  $(YELLOW)help$(NC)               - Show this help message"
+	@printf "$(GREEN)DomoTron Makefile Commands:$(NC)\n"
+	@printf "  $(YELLOW)%-24s$(NC) - %s\n" "setup" "Initial setup (vault password, ansible.cfg)"
+	@printf "  $(YELLOW)%-24s$(NC) - %s\n" "init" "Initialize Terraform"
+	@printf "  $(YELLOW)%-24s$(NC) - %s\n" "plan" "Create Terraform execution plan"
+	@printf "  $(YELLOW)%-24s$(NC) - %s\n" "apply" "Apply Terraform changes"
+	@printf "  $(YELLOW)%-24s$(NC) - %s\n" "ansible-config" "Create ansible.cfg file"
+	@printf "  $(YELLOW)%-24s$(NC) - %s\n" "ansible-requirements" "Install Ansible requirements"
+	@printf "  $(YELLOW)%-24s$(NC) - %s\n" "provision" "Run all Ansible playbooks"
+	@printf "  $(YELLOW)%-24s$(NC) - %s\n" "provision-adguard" "Run AdGuard playbook"
+	@printf "  $(YELLOW)%-24s$(NC) - %s\n" "provision-mediabox" "Run MediaBox playbook"
+	@printf "  $(YELLOW)%-24s$(NC) - %s\n" "provision-nginx" "Run Nginx Proxy Manager playbook"
+	@printf "  $(YELLOW)%-24s$(NC) - %s\n" "provision-tailscale" "Run Tailscale playbook"
+	@printf "  $(YELLOW)%-24s$(NC) - %s\n" "validate" "Validate Terraform and Ansible configurations"
+	@printf "  $(YELLOW)%-24s$(NC) - %s\n" "clean" "Clean up generated files"
+	@printf "  $(YELLOW)%-24s$(NC) - %s\n" "deploy" "Complete deployment"
+	@printf "  $(YELLOW)%-24s$(NC) - %s\n" "help" "Show this help message"

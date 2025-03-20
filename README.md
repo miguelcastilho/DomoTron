@@ -53,11 +53,11 @@ Before you begin, ensure you have the following installed:
 3. **Configure Variables:**
 
    ```bash
-   cd terraform/environments/prod
+   cd terraform
    cp terraform.tfvars.example terraform.tfvars
    ```
 
-   Edit `terraform.tfvars` with your environment-specific values.
+   Edit `terraform.tfvars` with your values.
 
 ## Quick Start
 
@@ -108,7 +108,7 @@ make provision-adguard  # Run only the AdGuard playbook
 
 ## Project Structure
 
-The project is organized with a modular, environment-based structure:
+The project is organized with a modular structure:
 
 ```
 project/
@@ -119,14 +119,15 @@ project/
 │   └── *.yml             # Individual playbooks
 ├── docs/                 # Documentation
 ├── scripts/              # Utility scripts
+│   └── terraform_inventory.py  # Dynamic inventory generator
 ├── terraform/            # Infrastructure as code
-│   ├── environments/     # Environment-specific configurations
-│   │   ├── prod/         # Production environment
-│   │   └── dev/          # Development environment
-│   └── modules/          # Reusable Terraform modules
-│       ├── proxmox_vm/   # VM creation module
-│       ├── proxmox_lxc/  # LXC creation module
-│       └── ansible_integration/ # Ansible integration module
+│   ├── modules/          # Reusable Terraform modules
+│   │   ├── proxmox_vm/   # VM creation module
+│   │   ├── proxmox_lxc/  # LXC creation module
+│   │   └── ansible_integration/ # Ansible integration module
+│   ├── main.tf           # Main infrastructure definition
+│   ├── variables.tf      # Variable declarations
+│   └── outputs.tf        # Outputs for Ansible consumption
 ├── .github/workflows/    # CI/CD pipelines
 └── Makefile              # Standardized commands
 ```

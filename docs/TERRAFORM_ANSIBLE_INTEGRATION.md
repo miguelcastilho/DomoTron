@@ -10,7 +10,7 @@ DomoTron uses a modular approach to integrate Terraform (for infrastructure prov
 2. **Secure variable passing**: Sensitive data is encrypted with Ansible Vault
 3. **Idempotent operations**: Changes are applied only when needed
 4. **Modular design**: Reusable components can be combined in different ways
-5. **Environment-based structure**: Configurations for different environments (prod, dev)
+5. **Single environment structure**: All configurations in one place for simplicity
 
 ## Integration Architecture
 
@@ -53,17 +53,17 @@ Infrastructure is defined using reusable modules:
 - `proxmox_lxc`: Manages LXC creation and configuration
 - Each module has integrated Ansible provisioning capabilities
 
-### 4. Environment Separation
+### 4. Single Environment Structure
 
-The environments directory structure:
-- Separates production from development configurations
-- Allows different variables for each environment
-- Maintains consistency through shared modules
+The project uses a simplified flat structure:
+- All configurations are in the main terraform directory
+- Variables are defined in a single place
+- Modules are referenced directly from the main directory
 
 ## Workflow
 
 1. **Infrastructure Provisioning**:
-   - Terraform creates the infrastructure using environment-specific configurations
+   - Terraform creates the infrastructure using the defined configurations
    - Resources are tagged for better organization and tracking
    - Dependencies are properly managed to ensure correct order
 
@@ -79,7 +79,7 @@ The environments directory structure:
    - Host variables are set based on Terraform outputs
 
 4. **Configuration Management**:
-   - Ansible playbooks are executed with the correct inventory
+   - Ansible playbooks are executed with the dynamic inventory
    - The vault password is securely used via ansible.cfg
    - Playbooks are organized by role and function
 
@@ -105,7 +105,7 @@ See the [README.md](../README.md) and [Makefile](../Makefile) for common operati
 - `make init`: Initialize Terraform
 - `make plan`: Plan Terraform changes
 - `make apply`: Apply Terraform changes
-- `make provision`: Run Ansible playbooks
+- `make provision`: Run Ansible playbooks with dynamic inventory
 
 ## CI/CD Integration
 
@@ -118,7 +118,10 @@ The project includes GitHub Actions workflows:
 If you encounter issues with the integration:
 
 1. Check the Terraform state to verify resources are created correctly
-2. Verify the dynamic inventory is generating the expected output
+2. Verify the dynamic inventory is generating the expected output:
+   ```bash
+   ansible-inventory -i ansible/terraform_inventory.sh --list --yaml
+   ```
 3. Ensure the vault password file is accessible and has correct permissions
 4. Review the ansible.cfg file to ensure it's configured correctly
 5. Enable verbose logging in Ansible with `-v` flag for more details

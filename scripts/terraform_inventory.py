@@ -7,7 +7,7 @@ import argparse
 from pathlib import Path
 
 # Configuration
-TERRAFORM_DIR = Path(__file__).parent.parent / "terraform/environments/prod"
+TERRAFORM_DIR = Path(__file__).parent.parent / "terraform"
 ANSIBLE_DIR = Path(__file__).parent.parent / "ansible"
 
 

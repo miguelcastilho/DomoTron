@@ -16,7 +16,7 @@ output "servers" {
       hostname = var.tailscale_hostname
       roles    = ["network", "tailscale"]
     }
-    nginx_proxy_manager = {
+    nginx = {
       ip       = var.nginx_ip_address
       hostname = var.nginx_hostname
       roles    = ["proxy", "nginx"]
@@ -31,7 +31,32 @@ output "cloudflare" {
     account_id  = var.cloudflare_account_id
     tunnel_name = cloudflare_zero_trust_tunnel_cloudflared.mediabox.name
   }
-  sensitive = true
+  sensitive = false
+}
+
+output "mediabox" {
+  description = "MediaBox VM details"
+  value       = module.mediabox
+}
+
+output "adguard" {
+  description = "AdGuard LXC details"
+  value       = module.adguard
+}
+
+output "tailscale" {
+  description = "Tailscale LXC details"
+  value       = module.tailscale
+}
+
+output "nginx" {
+  description = "Nginx Proxy Manager LXC details"
+  value       = module.nginx
+}
+
+output "ansible_integration" {
+  description = "Path to Ansible variables file"
+  value       = module.ansible_integration.ansible_variables_file
 }
 
 output "sensitive_values_stored_in" {
