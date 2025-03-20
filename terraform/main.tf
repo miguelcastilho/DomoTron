@@ -1,23 +1,7 @@
-# Generate Tailscale key
-resource "tailscale_tailnet_key" "tailscale_key" {
-  reusable            = true
-  ephemeral           = true
-  preauthorized       = true
-  description         = "terraform"
-  recreate_if_invalid = "always"
-}
-
-# Generate random ID for Cloudflare tunnel
-resource "random_id" "tunnel_secret" {
-  byte_length = 32
-}
-
-# Create Cloudflare tunnel
-resource "cloudflare_zero_trust_tunnel_cloudflared" "mediabox" {
-  name       = var.cloudflare_tunnel_name
-  account_id = var.cloudflare_account_id
-  secret     = random_id.tunnel_secret.b64_std
-}
+# These resources are now defined in cloudflared.tf
+# Generate Tailscale key - defined in proxmox_lxc.tf
+# Generate random ID for Cloudflare tunnel - defined in cloudflared.tf
+# Create Cloudflare tunnel - defined in cloudflared.tf
 
 # AdGuard LXC
 module "adguard" {
@@ -46,7 +30,7 @@ module "adguard" {
   }
   
   dependencies = [
-    module.ansible_integration.ansible_variables_file
+    local_file.tf_ansible_vars
   ]
 }
 
@@ -77,7 +61,7 @@ module "tailscale" {
   }
   
   dependencies = [
-    module.ansible_integration.ansible_variables_file,
+    local_file.tf_ansible_vars,
     tailscale_tailnet_key.tailscale_key
   ]
 }
@@ -109,7 +93,7 @@ module "nginx" {
   }
   
   dependencies = [
-    module.ansible_integration.ansible_variables_file
+    local_file.tf_ansible_vars
   ]
 }
 
@@ -132,7 +116,6 @@ module "mediabox" {
   ssh_public_key = var.ssh_public_key
   bios           = var.mediabox_bios
   machine        = var.mediabox_machine_type
-  additional_wait = 60
   
   ansible_playbook    = var.ansible_playbooks.mediabox
   ansible_inventory   = var.ansible_inventory
@@ -145,46 +128,10 @@ module "mediabox" {
   }
   
   dependencies = [
-    module.ansible_integration.ansible_variables_file
+    local_file.tf_ansible_vars
   ]
 }
 
-# Ansible integration module
-module "ansible_integration" {
-  source = "./modules/ansible_integration"
-  
-  project_root = abspath("${path.module}/..")
-  vault_password_file = ".vault_password"
-  
-  sensitive_variables = {
-    cf_tunnel_secret = random_id.tunnel_secret.b64_std
-    cf_token         = var.cloudflare_token
-    tailscale_authkey = tailscale_tailnet_key.tailscale_key.key
-  }
-  
-  non_sensitive_variables = {
-    cf_tunnel_id        = cloudflare_zero_trust_tunnel_cloudflared.mediabox.id
-    cf_account_id       = var.cloudflare_account_id
-    cf_tunnel_name      = cloudflare_zero_trust_tunnel_cloudflared.mediabox.name
-    mediabox_ip_address = var.mediabox_ip_address
-  }
-  
-  output_file = "ansible/tf_ansible_vars.yml"
-  
-  dependencies = [
-    tailscale_tailnet_key.tailscale_key,
-    cloudflare_zero_trust_tunnel_cloudflared.mediabox,
-    random_id.tunnel_secret
-  ]
-}
+# Removed ansible_integration module - using local_file.tf_ansible_vars from export.tf instead
 
-# Proxmox host configuration
-resource "null_resource" "execute_ansible_on_proxmox" {
-  provisioner "local-exec" {
-    command = "ansible-playbook -i ${var.ansible_inventory} ${var.ansible_playbooks.proxmox}"
-  }
-  
-  depends_on = [
-    module.ansible_integration.ansible_variables_file
-  ]
-}
+# Proxmox host configuration - moved to proxmox_vm.tf

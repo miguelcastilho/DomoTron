@@ -11,44 +11,44 @@ NC = \033[0m # No Color
 
 # Check if vault password file and ansible.cfg exist
 env-check:
-	@if [ ! -f terraform/.vault_password ]; then \
-		printf "$(RED)Error: terraform/.vault_password not found. Run 'make setup' first.$(NC)\n"; \
+	@if [ ! -f .vault_password ]; then \
+		printf "$(RED)Error: .vault_password not found. Run 'make setup' first.$(NC)\n"; \
 		exit 1; \
 	fi
-	@if [ ! -f terraform/ansible.cfg ]; then \
+	@if [ ! -f ansible.cfg ]; then \
 		printf "$(RED)Error: ansible.cfg not found. Run 'make setup' first.$(NC)\n"; \
 		exit 1; \
 	fi
 
 # Create ansible.cfg
 ansible-config:
-	@printf "$(YELLOW)Creating terraform/ansible.cfg...$(NC)\n"
-	@echo "[defaults]" > $(shell pwd)/terraform/ansible.cfg
-	@echo "inventory = $(shell pwd)/ansible/terraform_inventory.sh" >> terraform/ansible.cfg
-	@echo "vault_password_file = $(shell pwd)/terraform/.vault_password" >> terraform/ansible.cfg
-	@echo "host_key_checking = False" >> terraform/ansible.cfg
-	@echo "roles_path = $(shell pwd)/ansible/roles" >> terraform/ansible.cfg
-	@echo "retry_files_enabled = False" >> terraform/ansible.cfg
-	@echo "force_color = True" >> terraform/ansible.cfg
-	@echo "stdout_callback = yaml" >> terraform/ansible.cfg
-	@echo "" >> terraform/ansible.cfg
-	@echo "# Parallelism settings" >> terraform/ansible.cfg
-	@echo "forks = 10" >> terraform/ansible.cfg
-	@echo "" >> terraform/ansible.cfg
-	@echo "[ssh_connection]" >> terraform/ansible.cfg
-	@echo "pipelining = False" >> terraform/ansible.cfg
-	@echo "ssh_args = -o ControlMaster=auto -o ControlPersist=60s -o StrictHostKeyChecking=no" >> terraform/ansible.cfg
-	@echo "" >> terraform/ansible.cfg
-	@echo "[diff]" >> terraform/ansible.cfg
-	@echo "always = True" >> terraform/ansible.cfg
-	@echo "context = 3" >> terraform/ansible.cfg
-	@chmod 644 terraform/ansible.cfg
-	@printf "$(GREEN)File terraform/ansible.cfg created!$(NC)\n"
+	@printf "$(YELLOW)Creating ansible.cfg...$(NC)\n"
+	@echo "[defaults]" > $(shell pwd)/ansible.cfg
+	@echo "inventory = $(shell pwd)/ansible/terraform_inventory.sh" >> ansible.cfg
+	@echo "vault_password_file = $(shell pwd)/.vault_password" >> ansible.cfg
+	@echo "host_key_checking = False" >> ansible.cfg
+	@echo "roles_path = $(shell pwd)/ansible/roles" >> ansible.cfg
+	@echo "retry_files_enabled = False" >> ansible.cfg
+	@echo "force_color = True" >> ansible.cfg
+	@echo "stdout_callback = yaml" >> ansible.cfg
+	@echo "" >> ansible.cfg
+	@echo "# Parallelism settings" >> ansible.cfg
+	@echo "forks = 10" >> ansible.cfg
+	@echo "" >> ansible.cfg
+	@echo "[ssh_connection]" >> ansible.cfg
+	@echo "pipelining = False" >> ansible.cfg
+	@echo "ssh_args = -o ControlMaster=auto -o ControlPersist=60s -o StrictHostKeyChecking=no" >> ansible.cfg
+	@echo "" >> ansible.cfg
+	@echo "[diff]" >> ansible.cfg
+	@echo "always = True" >> ansible.cfg
+	@echo "context = 3" >> ansible.cfg
+	@chmod 644 ansible.cfg
+	@printf "$(GREEN)File ansible.cfg created!$(NC)\n"
 
 # Initial setup
 setup:
 	@printf "$(YELLOW)Creating vault password file...$(NC)\n"
-	@if [ ! -f terraform/.vault_password ]; then \
+	@if [ ! -f .vault_password ]; then \
 		printf "Please enter a strong password for Ansible Vault encryption (press Enter to auto-generate):\n"; \
 		read -s VAULT_PASS; \
 		if [ -z "$$VAULT_PASS" ]; then \
@@ -59,10 +59,10 @@ setup:
 				VAULT_PASS=$$(cat /dev/urandom | LC_ALL=C tr -dc 'a-zA-Z0-9!@#$%^&*()_+?><~' | head -c 32); \
 			fi; \
 			printf "$(GREEN)Secure password generated!$(NC)\n"; \
-			printf "$(YELLOW)Important: This password will not be shown again. It is securely stored in terraform/.vault_password$(NC)\n"; \
+			printf "$(YELLOW)Important: This password will not be shown again. It is securely stored in .vault_password$(NC)\n"; \
 		fi; \
-		echo "$$VAULT_PASS" > terraform/.vault_password; \
-		chmod 600 terraform/.vault_password; \
+		echo "$$VAULT_PASS" > .vault_password; \
+		chmod 600 .vault_password; \
 		printf "$(GREEN)Vault password file created!$(NC)\n"; \
 	else \
 		printf "$(GREEN)Vault password file already exists.$(NC)\n"; \

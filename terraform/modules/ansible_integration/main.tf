@@ -70,11 +70,11 @@ resource "local_file" "variables_template" {
   filename        = "${var.project_root}/${var.output_file}"
   file_permission = "0644"
   
-  depends_on = var.dependencies
+  # Dependencies are passed to the module and handled externally
   
   # Encrypt the variables file if it contains sensitive data
   provisioner "local-exec" {
-    command = length(var.sensitive_variables) > 0 ? "ansible-vault encrypt ${var.project_root}/../ansible/tf_ansible_vars.yml" : "echo 'No sensitive variables to encrypt'"
+    command = length(var.sensitive_variables) > 0 ? "ansible-vault encrypt ${var.project_root}/${var.output_file}" : "echo 'No sensitive variables to encrypt'"
   }
 }
 

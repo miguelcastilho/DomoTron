@@ -1,3 +1,12 @@
+terraform {
+  required_providers {
+    proxmox = {
+      source  = "telmate/proxmox"
+      version = "3.0.1-rc1"
+    }
+  }
+}
+
 variable "target_node" {
   description = "Proxmox node to deploy the LXC on"
   type        = string
@@ -152,7 +161,7 @@ resource "proxmox_lxc" "lxc" {
   #   ]
   # }
   
-  depends_on = var.dependencies
+  # Dependencies are passed to the module and handled externally
 }
 
 output "lxc_ip" {

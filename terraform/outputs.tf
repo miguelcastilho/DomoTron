@@ -31,7 +31,7 @@ output "cloudflare" {
     account_id  = var.cloudflare_account_id
     tunnel_name = cloudflare_zero_trust_tunnel_cloudflared.mediabox.name
   }
-  sensitive = false
+  sensitive = true
 }
 
 output "mediabox" {
@@ -54,9 +54,9 @@ output "nginx" {
   value       = module.nginx
 }
 
-output "ansible_integration" {
+output "ansible_variables_file" {
   description = "Path to Ansible variables file"
-  value       = module.ansible_integration.ansible_variables_file
+  value       = "${path.module}/../ansible/tf_ansible_vars.yml"
 }
 
 output "sensitive_values_stored_in" {

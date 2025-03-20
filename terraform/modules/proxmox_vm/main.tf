@@ -1,3 +1,12 @@
+terraform {
+  required_providers {
+    proxmox = {
+      source  = "telmate/proxmox"
+      version = "3.0.1-rc1"
+    }
+  }
+}
+
 variable "target_node" {
   description = "Proxmox node to deploy the VM on"
   type        = string
@@ -155,8 +164,8 @@ resource "proxmox_vm_qemu" "vm" {
   ipconfig0 = "ip=${var.ip_address}${var.netmask},gw=${var.gateway}"
   sshkeys   = var.ssh_public_key
   
-  # Add tags as description
-  description = join(",", [for key, value in var.tags : "${key}=${value}"])
+  # Tags are handled differently in Proxmox
+  # description = join(",", [for key, value in var.tags : "${key}=${value}"])
   
   # Wait for VM to be ready before continuing
   # provisioner "local-exec" {
@@ -175,12 +184,7 @@ resource "proxmox_vm_qemu" "vm" {
   #   ]
   # }
   
-  dynamic "depends_on" {
-    for_each = length(var.dependencies) > 0 ? [1] : []
-    content {
-      dependencies = var.dependencies
-    }
-  }
+  # Dependencies are passed to the module and handled externally
 }
 
 output "vm_ip" {
