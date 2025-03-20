@@ -1,8 +1,7 @@
 # This resource checks for the existence of the ansible.cfg file
 resource "null_resource" "check_ansible_cfg" {
-  # Verify that ansible.cfg exists, fail if it doesn't
   provisioner "local-exec" {
-    command = "[ -f \"${abspath(path.module)}/../ansible.cfg\" ] || (echo \"ERROR: ansible.cfg not found. Run 'make setup' first.\" && exit 1)"
+    command = "[ -f \"${abspath(path.module)}/ansible.cfg\" ] || (echo \"ERROR: ansible.cfg not found. Run 'make setup' first.\" && exit 1)"
   }
 }
 

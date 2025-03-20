@@ -94,13 +94,13 @@ jobs:
           pip install ansible
       
       - name: Setup dummy vault password file
-        run: echo "dummy" > .vault_password
+        run: echo "dummy" > terraform/.vault_password
         
       - name: Create ansible.cfg
         run: |
-          cat > ansible.cfg << EOF
+          cat > terraform/ansible.cfg << EOF
           [defaults]
-          vault_password_file = .vault_password
+          vault_password_file = terraform/.vault_password
           host_key_checking = False
           EOF
       

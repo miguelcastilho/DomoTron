@@ -96,8 +96,8 @@ jobs:
       
       - name: Create Vault Password
         run: |
-          echo "${{ secrets.ANSIBLE_VAULT_PASSWORD }}" > .vault_password
-          chmod 600 .vault_password
+          echo "${{ secrets.ANSIBLE_VAULT_PASSWORD }}" > terraform/.vault_password
+          chmod 600 terraform/.vault_password
       
       - name: Download Terraform Plan
         uses: actions/download-artifact@v3

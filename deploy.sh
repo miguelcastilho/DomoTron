@@ -37,7 +37,7 @@ if [ ! -f "${SCRIPT_DIR}/terraform/terraform.tfvars" ]; then
 fi
 
 # Check/create vault password file
-if [ ! -f "${SCRIPT_DIR}/.vault_password" ]; then
+if [ ! -f "${SCRIPT_DIR}/terraform/.vault_password" ]; then
   echo -e "${YELLOW}Vault password file not found. Creating a new one...${NC}"
   echo "Please enter a strong password for Ansible Vault encryption (press Enter to auto-generate):"
   read -s VAULT_PASS
@@ -53,23 +53,23 @@ if [ ! -f "${SCRIPT_DIR}/.vault_password" ]; then
       VAULT_PASS=$(cat /dev/urandom | LC_ALL=C tr -dc 'a-zA-Z0-9!@#$%^&*()_+?><~' | head -c 32)
     fi
     echo -e "${GREEN}Secure password generated!${NC}"
-    echo -e "${YELLOW}Important: This password will not be shown again. It is securely stored in .vault_password${NC}"
+    echo -e "${YELLOW}Important: This password will not be shown again. It is securely stored in terraform/.vault_password${NC}"
   fi
   
   # Write the password to the vault file
-  echo "$VAULT_PASS" > "${SCRIPT_DIR}/.vault_password"
-  chmod 600 "${SCRIPT_DIR}/.vault_password"
+  echo "$VAULT_PASS" > "${SCRIPT_DIR}/terraform/.vault_password"
+  chmod 600 "${SCRIPT_DIR}/terraform/.vault_password"
   echo -e "${GREEN}Vault password file created!${NC}"
 fi
 
 # Export environment variables
-export ANSIBLE_VAULT_PASSWORD_FILE="${SCRIPT_DIR}/.vault_password"
+export ANSIBLE_VAULT_PASSWORD_FILE="${SCRIPT_DIR}/terraform/.vault_password"
 
 # Create an ansible.cfg file to ensure consistent vault password file usage
-cat > "${SCRIPT_DIR}/ansible.cfg" << EOF
+cat > "${SCRIPT_DIR}/terraform/ansible.cfg" << EOF
 [defaults]
 inventory = ${SCRIPT_DIR}/ansible/terraform_inventory.sh
-vault_password_file = ${SCRIPT_DIR}/.vault_password
+vault_password_file = ${SCRIPT_DIR}/terraform/.vault_password
 host_key_checking = False
 roles_path = ${SCRIPT_DIR}/ansible/roles
 retry_files_enabled = False
@@ -88,7 +88,7 @@ always = True
 context = 3
 EOF
 
-chmod 644 "${SCRIPT_DIR}/ansible.cfg"
+chmod 644 "${SCRIPT_DIR}/terraform/ansible.cfg"
 echo -e "${GREEN}Vault password configured for Ansible and ansible.cfg created.${NC}"
 
 echo -e "${YELLOW}Checking for required tools...${NC}"

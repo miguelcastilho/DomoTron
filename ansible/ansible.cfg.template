@@ -1,7 +1,7 @@
 [defaults]
-inventory = terraform_inventory.sh
+inventory = ./terraform_inventory.sh
 host_key_checking = False
-vault_password_file = ../.vault_password
+vault_password_file = ../terraform/.vault_password
 roles_path = ./roles
 retry_files_enabled = False
 force_color = True
