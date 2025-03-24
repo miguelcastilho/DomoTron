@@ -34,33 +34,6 @@ variable "dependencies" {
   default     = []
 }
 
-# # Create the ansible.cfg file
-# resource "local_file" "ansible_config" {
-#   content = <<-EOT
-#     [defaults]
-#     inventory = ${var.project_root}/ansible/terraform_inventory.sh
-#     vault_password_file = ${var.project_root}/${var.vault_password_file}
-#     host_key_checking = False
-#     roles_path = ${var.project_root}/ansible/roles
-#     retry_files_enabled = False
-#     force_color = True
-#     stdout_callback = yaml
-
-#     # Parallelism settings
-#     forks = 10
-       
-#     [ssh_connection]
-#     pipelining = False
-#     ssh_args = -o ControlMaster=auto -o ControlPersist=60s -o StrictHostKeyChecking=no
-
-#     [diff]
-#     always = True
-#     context = 3
-#   EOT
-#   filename        = "${var.project_root}/ansible.cfg"
-#   file_permission = "0644"
-# }
-
 # Create a template file for variables
 resource "local_file" "variables_template" {
   content = templatefile("${path.module}/templates/variables.yml.tpl", {

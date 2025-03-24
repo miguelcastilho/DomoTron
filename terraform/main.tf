@@ -60,10 +60,10 @@ module "tailscale" {
     app         = "tailscale"
   }
 
-  dependencies = [
-    local_file.tf_ansible_vars,
-    tailscale_tailnet_key.tailscale_key
-  ]
+  # dependencies = [
+  #   local_file.tf_ansible_vars,
+  #   tailscale_tailnet_key.tailscale_key
+  # ]
 }
 
 # Nginx Proxy Manager LXC
@@ -92,9 +92,9 @@ module "nginx" {
     app         = "nginx_proxy_manager"
   }
 
-  dependencies = [
-    local_file.tf_ansible_vars
-  ]
+  # dependencies = [
+  #   local_file.tf_ansible_vars
+  # ]
 }
 
 # MediaBox VM
@@ -127,9 +127,9 @@ module "mediabox" {
     app         = "mediabox"
   }
 
-  dependencies = [
-    local_file.tf_ansible_vars
-  ]
+  # dependencies = [
+  #   local_file.tf_ansible_vars
+  # ]
 }
 
 # Removed ansible_integration module - using local_file.tf_ansible_vars from export.tf instead
