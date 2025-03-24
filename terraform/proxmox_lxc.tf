@@ -15,7 +15,7 @@ resource "proxmox_lxc" "adguard" {
     name   = "eth0"
     bridge = "vmbr0"
     gw     = var.gateway_ip_address
-    ip     = "${var.adguard_ip_address}${var.netmask}"
+    ip = "cidrhost(var.network_address, var.adguard_vm_id)/${split("/", var.netmask)[1]}"
   }
   ssh_public_keys = var.ssh_public_key
   onboot          = true
@@ -56,7 +56,7 @@ resource "proxmox_lxc" "tailscale" {
     name   = "eth0"
     bridge = "vmbr0"
     gw     = var.gateway_ip_address
-    ip     = "${var.tailscale_ip_address}${var.netmask}"
+    ip = "cidrhost(var.network_address, var.tailscale_vm_id)/${split("/", var.netmask)[1]}"
   }
   ssh_public_keys = var.ssh_public_key
   onboot          = true
@@ -96,7 +96,7 @@ resource "proxmox_lxc" "nginx" {
     name   = "eth0"
     bridge = "vmbr0"
     gw     = var.gateway_ip_address
-    ip     = "${var.nginx_ip_address}${var.netmask}"
+    ip = "cidrhost(var.network_address, var.nginx_vm_id)/${split("/", var.netmask)[1]}"
   }
   ssh_public_keys = var.ssh_public_key
   onboot          = true

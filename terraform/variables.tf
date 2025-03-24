@@ -10,10 +10,10 @@ variable "lxc_base_image" {
   default     = "local:vztmpl/ubuntu-22.04-standard_22.04-1_amd64.tar.zst"
 }
 
-variable "netmask" {
-  description = "Network mask"
+variable "network_Address" {
+  description = "Network address"
   type        = string
-  default     = "/24"
+  default     = "192.168.1.0/24"
 }
 
 variable "ssh_public_key" {

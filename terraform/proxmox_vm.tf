@@ -35,7 +35,7 @@ resource "proxmox_vm_qemu" "mediabox" {
     model  = "virtio"
     bridge = "vmbr0"
   }
-  ipconfig0 = "ip=${var.mediabox_ip_address}${var.netmask},gw=${var.gateway_ip_address}"
+  ipconfig0 = "ip=${cidrhost(var.network_address, var.mediabox_vm_id}/${split("/", var.network_address)[1]},gw=${var.gateway_ip_address}")
   sshkeys   = var.ssh_public_key
 
   # Install Ansible Galaxy requirements first
