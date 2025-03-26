@@ -1,277 +1,373 @@
-# General Variables
+// General variables
+variable "network_address" {
+  type        = string
+  description = "Network address in CIDR notation (e.g. 192.168.1.0/24)."
+}
+
 variable "gateway_ip_address" {
-  description = "Gateway IP address"
   type        = string
-}
-
-variable "lxc_base_image" {
-  description = "Template to clone"
-  type        = string
-  default     = "local:vztmpl/ubuntu-22.04-standard_22.04-1_amd64.tar.zst"
-}
-
-variable "network_Address" {
-  description = "Network address"
-  type        = string
-  default     = "192.168.1.0/24"
+  description = "Gateway IP address for the network."
 }
 
 variable "ssh_public_key" {
-  description = "SSH public key for VM access"
   type        = string
+  description = "SSH public key."
 }
 
-# Proxmox
-variable "proxmox_api_url" {
-  description = "Proxmox API URL"
+variable "lxc_base_image" {
   type        = string
+  description = "Base image for LXC containers."
+}
+
+// Proxmox provider variables
+variable "proxmox_api_url" {
+  type        = string
+  description = "Proxmox API URL endpoint."
 }
 
 variable "proxmox_api_token_id" {
-  description = "Proxmox API Token ID"
   type        = string
-  sensitive   = true
+  description = "Proxmox API token ID."
 }
 
 variable "proxmox_api_token_secret" {
-  description = "Proxmox API Token Secret"
   type        = string
-  sensitive   = true
+  description = "Proxmox API token secret."
 }
 
-# Cloudflare
-variable "cloudflare_zone_id" {
-  description = "Cloudflare Zone ID"
-  type        = string
-  sensitive   = true
-}
-
-variable "cloudflare_account_id" {
-  description = "Cloudflare Account ID"
-  type        = string
-  sensitive   = true
-}
-
-variable "cloudflare_tunnel_name" {
-  description = "Cloudflare Tunnel Name"
-  type        = string
-  default     = "Terraform mediabox tunnel"
-}
-
+// Cloudflare provider variables
 variable "cloudflare_token" {
-  description = "Cloudflare API Token"
   type        = string
-  sensitive   = true
+  description = "Cloudflare API token."
 }
 
-# AdGuard
-variable "adguard_node" {
-  description = "Proxmox node for AdGuard"
-  type        = string
-}
-
-variable "adguard_vm_id" {
-  description = "VM ID for AdGuard"
-  type        = number
-}
-
-variable "adguard_hostname" {
-  description = "Hostname for AdGuard VM"
-  type        = string
-}
-
-variable "adguard_storage" {
-  description = "Storage for AdGuard VM"
-  type        = string
-}
-
-variable "adguard_storage_size" {
-  description = "Storage size for AdGuard VM"
-  type        = string
-}
-
-variable "adguard_cores" {
-  description = "Number of CPU cores for AdGuard VM"
-  type        = number
-}
-
-variable "adguard_memory" {
-  description = "Memory size for AdGuard VM"
-  type        = number
-}
-
-variable "adguard_ip_address" {
-  description = "IP address for AdGuard VM"
-  type        = string
-}
-
-# Tailscale
-variable "tailscale_node" {
-  description = "Proxmox node for Tailscale"
-  type        = string
-}
-
-variable "tailscale_vm_id" {
-  description = "VM ID for Tailscale"
-  type        = number
-}
-
-variable "tailscale_hostname" {
-  description = "Hostname for Tailscale VM"
-  type        = string
-}
-
-variable "tailscale_storage" {
-  description = "Storage for Tailscale VM"
-  type        = string
-}
-
-variable "tailscale_storage_size" {
-  description = "Storage size for Tailscale VM"
-  type        = string
-}
-
-variable "tailscale_cores" {
-  description = "Number of CPU cores for Tailscale VM"
-  type        = number
-}
-
-variable "tailscale_memory" {
-  description = "Memory size for Tailscale VM"
-  type        = number
-}
-
-variable "tailscale_ip_address" {
-  description = "IP address for Tailscale VM"
-  type        = string
-}
-
+// Tailscale provider variables
 variable "tailscale_api_key" {
-  description = "API key for terraform provider"
   type        = string
+  description = "Tailscale API key."
 }
 
 variable "tailscale_tailnet" {
-  description = "Tailnet"
   type        = string
+  description = "Tailscale tailnet."
 }
 
-# Mediabox
-variable "mediabox_node" {
-  description = "Proxmox node for Mediabox"
+// Terraform vars for keys and tunnels
+variable "tailscale_key_description" {
   type        = string
+  description = "Description for the Tailscale key."
 }
 
-variable "mediabox_vm_id" {
-  description = "VM ID for Mediabox"
-  type        = number
-}
-
-variable "mediabox_hostname" {
-  description = "Hostname for Mediabox VM"
+variable "cloudflare_zone_id" {
   type        = string
+  description = "Cloudflare zone ID."
 }
 
-variable "mediabox_vm_base_image" {
-  description = "Base image for Mediabox VM"
+variable "cloudflare_account_id" {
   type        = string
-  default     = "ubuntu-noble-server-cloud"
+  description = "Cloudflare account ID."
 }
 
-variable "mediabox_storage" {
-  description = "Storage for Mediabox VM"
+variable "cloudflare_tunnel_name" {
   type        = string
+  description = "Cloudflare tunnel name."
 }
 
-variable "mediabox_storage_size" {
-  description = "Storage size for Mediabox VM"
-  type        = number
-}
-
-variable "mediabox_cores" {
-  description = "Number of CPU cores for Mediabox VM"
-  type        = number
-}
-
-variable "mediabox_sockets" {
-  description = "Number of sockets for Mediabox VM"
-  type        = number
-}
-
-variable "mediabox_memory" {
-  description = "Memory size for Mediabox VM"
-  type        = number
-}
-
-variable "mediabox_ip_address" {
-  description = "IP address for Mediabox VM"
-  type        = string
-}
-
-variable "ansible_inventory" {
-  description = "Ansible inventory file path"
-  type        = string
-  default     = "../ansible/inventory/hosts.yml"
-}
-
-variable "ansible_requirements" {
-  description = "Ansible requirements file path"
-  type        = string
-  default     = "../ansible/requirements.yml"
-}
-
-variable "ansible_playbooks" {
-  description = "Mapping of VM names to their respective Ansible playbooks"
+variable "cloudflare_cname_records_name" {
   type        = map(string)
+  description = "Map of Cloudflare CNAME record names."
 }
 
-variable "mediabox_bios" {
-  description = "Bios type"
+// AdGuard LXC variables
+variable "adguard_node" {
   type        = string
+  description = "Proxmox node where AdGuard runs."
 }
 
-variable "mediabox_machine_type" {
-  description = "Machine type"
+variable "adguard_vm_id" {
+  type        = number
+  description = "VM ID for the AdGuard container."
+}
+
+variable "adguard_hostname" {
   type        = string
+  description = "Hostname for the AdGuard container."
 }
 
-# Nginx Proxy Manager
+variable "adguard_storage" {
+  type        = string
+  description = "Storage pool name for AdGuard."
+}
+
+variable "adguard_storage_size" {
+  type        = string
+  description = "Storage size for AdGuard (e.g. 2G)."
+}
+
+variable "adguard_cores" {
+  type        = number
+  description = "Number of CPU cores allocated to AdGuard."
+}
+
+variable "adguard_memory" {
+  type        = number
+  description = "Memory (in MB) allocated to AdGuard."
+}
+
+variable "adguard_unprivileged" {
+  type        = bool
+  description = "Whether the AdGuard LXC container is unprivileged."
+}
+
+variable "adguard_network_name" {
+  type        = string
+  description = "Network interface name for AdGuard."
+}
+
+variable "adguard_bridge" {
+  type        = string
+  description = "Network bridge for AdGuard."
+}
+
+variable "adguard_onboot" {
+  type        = bool
+  description = "Whether AdGuard starts on boot."
+}
+
+variable "adguard_start" {
+  type        = bool
+  description = "Whether to start the AdGuard container."
+}
+
+// Tailscale LXC variables
+variable "tailscale_node" {
+  type        = string
+  description = "Proxmox node where Tailscale runs."
+}
+
+variable "tailscale_vm_id" {
+  type        = number
+  description = "VM ID for the Tailscale container."
+}
+
+variable "tailscale_hostname" {
+  type        = string
+  description = "Hostname for the Tailscale container."
+}
+
+variable "tailscale_storage" {
+  type        = string
+  description = "Storage pool name for Tailscale."
+}
+
+variable "tailscale_storage_size" {
+  type        = string
+  description = "Storage size for Tailscale (e.g. 2G)."
+}
+
+variable "tailscale_cores" {
+  type        = number
+  description = "Number of CPU cores allocated to Tailscale."
+}
+
+variable "tailscale_memory" {
+  type        = number
+  description = "Memory (in MB) allocated to Tailscale."
+}
+
+variable "tailscale_unprivileged" {
+  type        = bool
+  description = "Whether the Tailscale LXC container is unprivileged."
+}
+
+variable "tailscale_network_name" {
+  type        = string
+  description = "Network interface name for Tailscale."
+}
+
+variable "tailscale_bridge" {
+  type        = string
+  description = "Network bridge for Tailscale."
+}
+
+variable "tailscale_onboot" {
+  type        = bool
+  description = "Whether Tailscale starts on boot."
+}
+
+variable "tailscale_start" {
+  type        = bool
+  description = "Whether to start the Tailscale container."
+}
+
+// Nginx LXC variables
 variable "nginx_node" {
-  description = "Proxmox node for NPM"
   type        = string
+  description = "Proxmox node where Nginx runs."
 }
 
 variable "nginx_vm_id" {
-  description = "VM ID for NPM"
   type        = number
+  description = "VM ID for the Nginx container."
 }
 
 variable "nginx_hostname" {
-  description = "Hostname for NPM"
   type        = string
+  description = "Hostname for the Nginx container."
 }
 
 variable "nginx_storage" {
-  description = "Storage for NPM"
   type        = string
+  description = "Storage pool name for Nginx."
 }
 
 variable "nginx_storage_size" {
-  description = "Storage size for NPM"
   type        = string
+  description = "Storage size for Nginx (e.g. 8G)."
 }
 
 variable "nginx_cores" {
-  description = "Number of CPU cores for NPM"
   type        = number
+  description = "Number of CPU cores allocated to Nginx."
 }
 
 variable "nginx_memory" {
-  description = "Memory size for NPM"
   type        = number
+  description = "Memory (in MB) allocated to Nginx."
 }
 
-variable "nginx_ip_address" {
-  description = "IP address for NPM"
+variable "nginx_unprivileged" {
+  type        = bool
+  description = "Whether the Nginx LXC container is unprivileged."
+}
+
+variable "nginx_network_name" {
   type        = string
+  description = "Network interface name for Nginx."
+}
+
+variable "nginx_bridge" {
+  type        = string
+  description = "Network bridge for Nginx."
+}
+
+variable "nginx_onboot" {
+  type        = bool
+  description = "Whether Nginx starts on boot."
+}
+
+variable "nginx_start" {
+  type        = bool
+  description = "Whether to start the Nginx container."
+}
+
+// Mediabox VM variables
+variable "mediabox_node" {
+  type        = string
+  description = "Proxmox node where Mediabox runs."
+}
+
+variable "mediabox_vm_id" {
+  type        = number
+  description = "VM ID for the Mediabox VM."
+}
+
+variable "mediabox_hostname" {
+  type        = string
+  description = "Hostname for the Mediabox VM."
+}
+
+variable "mediabox_vm_base_image" {
+  type        = string
+  description = "Base image for the Mediabox VM."
+}
+
+variable "mediabox_storage" {
+  type        = string
+  description = "Storage pool name for Mediabox."
+}
+
+variable "mediabox_storage_size" {
+  type        = number
+  description = "Storage size for the Mediabox VM."
+}
+
+variable "mediabox_cores" {
+  type        = number
+  description = "Number of CPU cores allocated to Mediabox."
+}
+
+variable "mediabox_sockets" {
+  type        = number
+  description = "Number of CPU sockets for Mediabox."
+}
+
+variable "mediabox_memory" {
+  type        = number
+  description = "Memory (in MB) allocated to Mediabox."
+}
+
+variable "mediabox_bios" {
+  type        = string
+  description = "BIOS type for the Mediabox VM."
+}
+
+variable "mediabox_machine_type" {
+  type        = string
+  description = "Machine type for the Mediabox VM."
+}
+
+variable "mediabox_proxmox_agent" {
+  type        = number
+  description = "Proxmox agent setting for the Mediabox VM."
+}
+
+variable "mediabox_os_type" {
+  type        = string
+  description = "OS type for the Mediabox VM."
+}
+
+variable "mediabox_cpu" {
+  type        = string
+  description = "CPU type for the Mediabox VM."
+}
+
+variable "mediabox_scsi_controller" {
+  type        = string
+  description = "SCSI controller type for the Mediabox VM."
+}
+
+variable "mediabox_bootdisk" {
+  type        = string
+  description = "Boot disk for the Mediabox VM."
+}
+
+variable "mediabox_onboot" {
+  type        = bool
+  description = "Whether the Mediabox VM starts on boot."
+}
+
+variable "mediabox_full_clone" {
+  type        = bool
+  description = "Whether the Mediabox VM is fully cloned."
+}
+
+variable "mediabox_disk_backup" {
+  type        = bool
+  description = "Whether disk backup is enabled for the Mediabox VM."
+}
+
+variable "mediabox_disk_discard" {
+  type        = bool
+  description = "Whether disk discard is enabled for the Mediabox VM."
+}
+
+variable "mediabox_network_model" {
+  type        = string
+  description = "Network model for the Mediabox VM."
+}
+
+variable "mediabox_network_bridge" {
+  type        = string
+  description = "Network bridge for the Mediabox VM."
 }

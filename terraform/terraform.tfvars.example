@@ -1,3 +1,7 @@
+# DomoTron Terraform Configuration Example
+# ----------------------------------------
+# Copy this file to terraform.tfvars and update the values
+
 # Proxmox API Configuration
 proxmox_api_url = "https://proxmox.example.com:8006/api2/json"
 proxmox_api_token_id = "user@pam!token_name"
@@ -10,14 +14,13 @@ ssh_public_key = "ssh-rsa AAAAB3NzaC1..."
 network_address = "192.168.1.0/24"
 gateway_ip_address = "192.168.1.1"
 
-
-# Cloudflare Configuration (Optional)
+# Cloudflare Configuration
 cloudflare_token = "your-cloudflare-api-token"
 cloudflare_zone_id = "your-cloudflare-zone-id"
 cloudflare_account_id = "your-cloudflare-account-id"
 cloudflare_tunnel_name = "DomoTron Tunnel"
 
-# Tailscale Configuration (Optional)
+# Tailscale Configuration
 tailscale_api_key = "your-tailscale-api-key"
 tailscale_tailnet = "example.com"
 
@@ -45,6 +48,7 @@ tailscale_ip_address = "192.168.1.101"
 mediabox_node = "proxmox-node"
 mediabox_vm_id = 102
 mediabox_hostname = "mediabox"
+mediabox_vm_base_image = "ubuntu-noble-server-cloud" # Template name in Proxmox
 mediabox_storage = "local-lvm"
 mediabox_storage_size = 100 # in GB
 mediabox_cores = 4

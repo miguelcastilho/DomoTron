@@ -1,9 +1,15 @@
 ---
-- name: Apply fix to Intel NIC e1000e hardware unit hang
-  hosts: pve
-  gather_facts: no
+- name: Apply post install configurations
+  hosts: pve1
+  gather_facts: false
   any_errors_fatal: true
   tasks:
+    - name: Install NFS Server
+      ansible.builtin.apt:
+        name: nfs-kernel-server
+        state: present
+        update_cache: true
+
     - name: Append post-up command to iface eno1 inet manual
       ansible.builtin.lineinfile:
         path: /etc/network/interfaces

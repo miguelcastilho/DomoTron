@@ -9,3 +9,4 @@ terraform/terraform.tfvars
 .vault_password
 ansible.cfg
 inventory_backup
+terraform/backup
